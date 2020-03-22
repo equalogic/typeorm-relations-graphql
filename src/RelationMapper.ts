@@ -1,6 +1,6 @@
 import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
-import { FieldNode, GraphQLResolveInfo, SelectionNode } from 'graphql';
+import { FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode } from 'graphql';
 
 export class RelationMapper {
   public constructor(private readonly connection: Connection) {}
@@ -12,12 +12,13 @@ export class RelationMapper {
       throw new Error(`Could not locate field named "${info.fieldName}" in query info"`);
     }
 
-    return this.buildRelationList(entity, field);
+    return this.buildRelationList(entity, field, info.fragments);
   }
 
   public buildRelationList(
     entity: Function | EntitySchema<any> | string,
     baseNode: SelectionNode,
+    fragments?: { [p: string]: FragmentDefinitionNode },
     basePropertyPath?: string,
   ): string[] {
     const relationNames: string[] = [];
@@ -34,20 +35,23 @@ export class RelationMapper {
         return;
       }
 
+      let currentPropertyPath = basePropertyPath;
+
       // find relation metadata, if field corresponds to a relation property
       const relationMetadata = this.findRelationMetadata(selectionNode, entity);
 
-      if (relationMetadata == null) {
-        return;
+      if (relationMetadata != null) {
+        // build up relation path by appending current property name
+        currentPropertyPath = basePropertyPath
+          ? `${basePropertyPath}.${relationMetadata.propertyName}`
+          : relationMetadata.propertyName;
+
+        // add the relation to the list
+        relationNames.push(currentPropertyPath);
       }
 
-      // build up relation path by appending current property name
-      const currentPropertyPath = basePropertyPath
-        ? `${basePropertyPath}.${relationMetadata.propertyName}`
-        : relationMetadata.propertyName;
-
-      // add the relation to the list
-      relationNames.push(currentPropertyPath);
+      // Note: if the field is not a relation property it's still possible that its children contain further
+      // relation properties, so we continue to recurse as long as there are nested selection sets.
 
       if (selectionNode.selectionSet == null) {
         return;
@@ -55,8 +59,9 @@ export class RelationMapper {
 
       // recursively map nested relations
       const nestedRelations = this.buildRelationList(
-        relationMetadata.inverseEntityMetadata.target,
+        relationMetadata ? relationMetadata.inverseEntityMetadata.target : entity,
         selectionNode,
+        fragments,
         currentPropertyPath,
       );
       relationNames.push(...nestedRelations);
