@@ -19,13 +19,7 @@ module.exports = {
   rules: {
     semi: ['error', 'always'],
     'comma-dangle': ['error', 'always-multiline'],
-    'arrow-parens': [
-      'error',
-      'as-needed',
-      {
-        requireForBlockBody: false,
-      },
-    ],
+    'arrow-parens': 'off',
     'object-curly-newline': [
       'error',
       {
