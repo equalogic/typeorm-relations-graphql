@@ -14,7 +14,6 @@
     "preserveConstEnums": true,
     "strictNullChecks": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
     },
@@ -24,7 +23,8 @@
     ]
   },
   "include":[
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules"
