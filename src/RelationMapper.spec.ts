@@ -33,7 +33,7 @@ describe('RelationMapper', () => {
     });
   });
 
-  it('maps GQL selections to ORM relations', async () => {
+  it('maps single-level GQL selections to ORM relations', async () => {
     let relations: string[] = [];
 
     // language=GraphQL
@@ -69,6 +69,54 @@ describe('RelationMapper', () => {
 
     // check we built the correct list of relations
     expect(relations).toEqual(['owner', 'store']);
+
+    // check the query result looks right
+    expect(result).toBeDefined();
+    expect(result.errors).toBeUndefined();
+    expect(result.data).toBeDefined();
+    expect(result.data?.products).toBeInstanceOf(Array);
+  });
+
+  it('maps multi-level GQL selections to ORM relations', async () => {
+    let relations: string[] = [];
+
+    // language=GraphQL
+    const query = `
+      query products {
+        products {
+          id
+          name
+          owner {
+            id
+            name
+          }
+          store {
+            id
+            name
+            owner {
+              id
+              name
+            }
+          }
+        }
+      }
+    `;
+
+    const result = await graphql(
+      executableSchema,
+      query,
+      {},
+      {
+        buildRelations: (info: GraphQLResolveInfo): string[] => {
+          relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+
+          return relations;
+        },
+      },
+    );
+
+    // check we built the correct list of relations
+    expect(relations).toEqual(['owner', 'store', 'store.owner']);
 
     // check the query result looks right
     expect(result).toBeDefined();

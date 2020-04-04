@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Owner } from './owner';
 
 @Entity()
 export class Store {
@@ -7,4 +8,7 @@ export class Store {
 
   @Column()
   public name: string;
+
+  @ManyToOne(_type => Owner)
+  public owner: Owner;
 }

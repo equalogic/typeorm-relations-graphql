@@ -24,6 +24,7 @@ export const typeDefs = `
   type Store {
     id: Int!
     name: String
+    owner: Owner
   }
 
   type Query {
