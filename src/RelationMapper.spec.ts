@@ -6,9 +6,11 @@ import { Product } from '../test/entities/product';
 import { Owner } from '../test/entities/owner';
 import { Store } from '../test/entities/store';
 import { resolvers, typeDefs } from '../test/schema';
+import { insertMockData, TestMockData } from '../test/data';
 
 describe('RelationMapper', () => {
   let connection: Connection;
+  let mockData: TestMockData;
   let executableSchema: GraphQLSchema;
 
   beforeAll(async () => {
@@ -20,6 +22,7 @@ describe('RelationMapper', () => {
       synchronize: true,
       dropSchema: true,
     });
+    mockData = await insertMockData(connection);
 
     // create GraphQL schema
     executableSchema = makeExecutableSchema({
@@ -74,7 +77,20 @@ describe('RelationMapper', () => {
     expect(result).toBeDefined();
     expect(result.errors).toBeUndefined();
     expect(result.data).toBeDefined();
-    expect(result.data?.products).toBeInstanceOf(Array);
+    expect(result.data?.products).toEqual([
+      {
+        id: expect.any(Number),
+        name: mockData.productA.name,
+        owner: {
+          id: expect.any(Number),
+          name: mockData.ownerA.name,
+        },
+        store: {
+          id: expect.any(Number),
+          name: mockData.storeA.name,
+        },
+      },
+    ]);
   });
 
   it('maps multi-level GQL selections to ORM relations', async () => {
@@ -122,6 +138,23 @@ describe('RelationMapper', () => {
     expect(result).toBeDefined();
     expect(result.errors).toBeUndefined();
     expect(result.data).toBeDefined();
-    expect(result.data?.products).toBeInstanceOf(Array);
+    expect(result.data?.products).toEqual([
+      {
+        id: expect.any(Number),
+        name: mockData.productA.name,
+        owner: {
+          id: expect.any(Number),
+          name: mockData.ownerA.name,
+        },
+        store: {
+          id: expect.any(Number),
+          name: mockData.storeA.name,
+          owner: {
+            id: expect.any(Number),
+            name: mockData.ownerA.name,
+          },
+        },
+      },
+    ]);
   });
 });
