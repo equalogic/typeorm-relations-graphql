@@ -18,6 +18,12 @@ export const typeDefs = `
     id: Int!
     name: String
     author: Author
+    store: Store
+  }
+
+  type Store {
+    id: Int!
+    name: String
   }
 
   type Query {

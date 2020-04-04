@@ -4,6 +4,7 @@ import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { RelationMapper } from './RelationMapper';
 import { Product } from '../test/entities/product';
 import { Author } from '../test/entities/author';
+import { Store } from '../test/entities/store';
 import { resolvers, typeDefs } from '../test/schema';
 
 describe('RelationMapper', () => {
@@ -15,7 +16,7 @@ describe('RelationMapper', () => {
     connection = await createConnection({
       type: 'sqlite',
       database: 'test/test.sqlite',
-      entities: [Product, Author],
+      entities: [Product, Author, Store],
       synchronize: true,
       dropSchema: true,
     });
@@ -45,6 +46,10 @@ describe('RelationMapper', () => {
             id
             name
           }
+          store {
+            id
+            name
+          }
         }
       }
     `;
@@ -63,7 +68,7 @@ describe('RelationMapper', () => {
     );
 
     // check we built the correct list of relations
-    expect(relations).toEqual(['author']);
+    expect(relations).toEqual(['author', 'store']);
 
     // check the query result looks right
     expect(result).toBeDefined();
