@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Author } from './author';
+import { Owner } from './owner';
 import { Store } from './store';
 
 @Entity()
@@ -10,8 +10,8 @@ export class Product {
   @Column()
   public name: string;
 
-  @ManyToOne(_type => Author)
-  public author: Author;
+  @ManyToOne(_type => Owner)
+  public owner: Owner;
 
   @ManyToOne(_type => Store)
   public store: Store;

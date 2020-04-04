@@ -9,7 +9,7 @@ export interface TestResolverContext {
 
 // language=GraphQL
 export const typeDefs = `
-  type Author {
+  type Owner {
     id: Int!
     name: String
   }
@@ -17,7 +17,7 @@ export const typeDefs = `
   type Product {
     id: Int!
     name: String
-    author: Author
+    owner: Owner
     store: Store
   }
 

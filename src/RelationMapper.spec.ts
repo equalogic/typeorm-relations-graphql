@@ -3,7 +3,7 @@ import { graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
 import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { RelationMapper } from './RelationMapper';
 import { Product } from '../test/entities/product';
-import { Author } from '../test/entities/author';
+import { Owner } from '../test/entities/owner';
 import { Store } from '../test/entities/store';
 import { resolvers, typeDefs } from '../test/schema';
 
@@ -16,7 +16,7 @@ describe('RelationMapper', () => {
     connection = await createConnection({
       type: 'sqlite',
       database: 'test/test.sqlite',
-      entities: [Product, Author, Store],
+      entities: [Product, Owner, Store],
       synchronize: true,
       dropSchema: true,
     });
@@ -42,7 +42,7 @@ describe('RelationMapper', () => {
         products {
           id
           name
-          author {
+          owner {
             id
             name
           }
@@ -68,7 +68,7 @@ describe('RelationMapper', () => {
     );
 
     // check we built the correct list of relations
-    expect(relations).toEqual(['author', 'store']);
+    expect(relations).toEqual(['owner', 'store']);
 
     // check the query result looks right
     expect(result).toBeDefined();
