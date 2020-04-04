@@ -157,4 +157,81 @@ describe('RelationMapper', () => {
       },
     ]);
   });
+
+  it('maps GQL selections containing fragments to ORM relations', async () => {
+    let relations: string[] = [];
+
+    // language=GraphQL
+    const query = `
+      fragment ProductFragment on Product {
+        id
+        name
+        owner {
+          ...OwnerFragment
+        }
+        store {
+          ...StoreFragment
+        }
+      }
+
+      fragment OwnerFragment on Owner {
+        id
+        name
+      }
+
+      fragment StoreFragment on Store {
+        id
+        name
+        owner {
+          id
+          name
+        }
+      }
+
+      query products {
+        products {
+          ...ProductFragment
+        }
+      }
+    `;
+
+    const result = await graphql(
+      executableSchema,
+      query,
+      {},
+      {
+        buildRelations: (info: GraphQLResolveInfo): string[] => {
+          relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+
+          return relations;
+        },
+      },
+    );
+
+    // check we built the correct list of relations
+    expect(relations).toEqual(['owner', 'store', 'store.owner']);
+
+    // check the query result looks right
+    expect(result).toBeDefined();
+    expect(result.errors).toBeUndefined();
+    expect(result.data).toBeDefined();
+    expect(result.data?.products).toEqual([
+      {
+        id: expect.any(Number),
+        name: mockData.productA.name,
+        owner: {
+          id: expect.any(Number),
+          name: mockData.ownerA.name,
+        },
+        store: {
+          id: expect.any(Number),
+          name: mockData.storeA.name,
+          owner: {
+            id: expect.any(Number),
+            name: mockData.ownerA.name,
+          },
+        },
+      },
+    ]);
+  });
 });
