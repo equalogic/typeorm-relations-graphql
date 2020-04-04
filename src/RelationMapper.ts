@@ -1,6 +1,6 @@
 import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
-import { FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode } from 'graphql';
+import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
 
 export class RelationMapper {
   public constructor(private readonly connection: Connection) {}
@@ -22,23 +22,19 @@ export class RelationMapper {
     basePropertyPath?: string,
   ): string[] {
     const relationNames: string[] = [];
+    const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
 
-    // ignore FragmentSpreadNode and InlineFragmentNode
-    if (baseNode.kind !== 'Field' || baseNode.selectionSet == null) {
+    if (selectionSet == null) {
       return relationNames;
     }
 
     // look for any relation properties among the selected fields inside the base node
-    baseNode.selectionSet.selections.forEach((selectionNode: SelectionNode) => {
-      // ignore FragmentSpreadNode and InlineFragmentNode
-      if (selectionNode.kind !== 'Field') {
-        return;
-      }
-
+    selectionSet.selections.forEach((selectionNode: SelectionNode) => {
+      const nodeName = this.getNameFromNode(selectionNode);
       let currentPropertyPath = basePropertyPath;
 
       // find relation metadata, if field corresponds to a relation property
-      const relationMetadata = this.findRelationMetadata(selectionNode, entity);
+      const relationMetadata = this.findRelationMetadata(nodeName, entity);
 
       if (relationMetadata != null) {
         // build up relation path by appending current property name
@@ -50,12 +46,10 @@ export class RelationMapper {
         relationNames.push(currentPropertyPath);
       }
 
-      // Note: if the field is not a relation property it's still possible that its children contain further
-      // relation properties, so we continue to recurse as long as there are nested selection sets.
-
-      if (selectionNode.selectionSet == null) {
-        return;
-      }
+      /*
+       * Note: if the field is not a relation property it's still possible that its children contain further
+       * relation properties, so we continue to recurse as long as there are nested selection sets.
+       */
 
       // recursively map nested relations
       const nestedRelations = this.buildRelationList(
@@ -79,12 +73,38 @@ export class RelationMapper {
   }
 
   private findRelationMetadata(
-    fieldNode: FieldNode,
+    nodeName: string,
     entity: Function | EntitySchema<any> | string,
   ): RelationMetadata | undefined {
     // find relation metadata, if field corresponds to a relation property
-    return this.getRelationsMetadata(entity).find(
-      relationMetadata => relationMetadata.propertyName === fieldNode.name.value,
-    );
+    return this.getRelationsMetadata(entity).find(relationMetadata => relationMetadata.propertyName === nodeName);
+  }
+
+  private getNameFromNode(selectionNode: SelectionNode): string {
+    switch (selectionNode.kind) {
+      case 'Field':
+      case 'FragmentSpread':
+        return selectionNode.name.value;
+      case 'InlineFragment':
+        throw new Error('Cannot get node name for an InlineFragment.');
+    }
+  }
+
+  private getSelectionSetFromNode(
+    selectionNode: SelectionNode,
+    fragments?: { [p: string]: FragmentDefinitionNode },
+  ): SelectionSetNode | undefined {
+    switch (selectionNode.kind) {
+      case 'FragmentSpread':
+        if (fragments == null || fragments[selectionNode.name.value] == null) {
+          throw new Error(`Could not find the fragment named ${selectionNode.name.value} referenced in the query.`);
+        }
+
+        return fragments[selectionNode.name.value].selectionSet;
+      case 'Field':
+        return selectionNode.selectionSet;
+      case 'InlineFragment':
+        throw new Error('Support for InlineFragment nodes has not been implemented.'); // TODO: implement InlineFragment support
+    }
   }
 }
