@@ -18,6 +18,7 @@
     "lint:fix": "eslint --ext .ts --ignore-path .gitignore . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:ci": "rimraf test/.results && mkdirp test/.results && jest --ci --runInBand --reporters=default --reporters=jest-junit",
     "postversion": "cp package.json README.md dist/",
     "release": "npx np --no-publish --contents dist/",
     "barrels:generate": "barrelsby --config barrelsby.json"
@@ -42,10 +43,16 @@
     "eslint-plugin-standard": "^4.0.1",
     "graphql-tools": "^4.0.7",
     "jest": "^25.1.0",
+    "jest-junit": "^10.0.0",
+    "mkdirp": "^1.0.4",
     "prettier": "^2.0.2",
     "sqlite3": "^4.1.1",
     "ts-jest": "^25.2.1",
     "typescript": "^3.8.3"
+  },
+  "jest-junit": {
+    "outputDirectory": "./test/.results",
+    "outputName": "junit.xml"
   },
   "main": "index.js",
   "np": {
