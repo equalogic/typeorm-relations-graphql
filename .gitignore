@@ -5,6 +5,11 @@ dist/
 !*.config.js
 !.eslintrc.js
 
+# Ignore test results
+test/.results/
+test/.coverage/
+*.sqlite
+
 # Node modules
 node_modules
 
