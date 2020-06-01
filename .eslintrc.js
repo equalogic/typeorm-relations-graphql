@@ -19,14 +19,11 @@ module.exports = {
   rules: {
     semi: ['error', 'always'],
     'comma-dangle': ['error', 'always-multiline'],
-    'arrow-parens': 'off',
-    'object-curly-newline': [
+    'arrow-parens': [
       'error',
+      'as-needed',
       {
-        ObjectExpression: { minProperties: 2, consistent: true },
-        ObjectPattern: { minProperties: 5, consistent: true },
-        ImportDeclaration: { consistent: true },
-        ExportDeclaration: { consistent: true },
+        requireForBlockBody: false,
       },
     ],
     'no-multiple-empty-lines': [
