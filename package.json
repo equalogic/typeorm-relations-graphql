@@ -42,8 +42,10 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "graphql-tools": "^4.0.7",
+    "husky": "^4.2.5",
     "jest": "^25.2.7",
     "jest-junit": "^10.0.0",
+    "lint-staged": "^10.2.7",
     "mkdirp": "^1.0.4",
     "prettier": "^2.0.2",
     "sqlite3": "^4.1.1",
@@ -55,6 +57,15 @@
     "outputName": "junit.xml"
   },
   "main": "index.js",
+  "types": "index.d.ts",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run barrels:generate && git add -A src/**/index.ts && lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix"
+  },
   "np": {
     "contents": "dist",
     "publish": false,
