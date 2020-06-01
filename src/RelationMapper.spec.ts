@@ -1,6 +1,6 @@
 import { Connection, createConnection } from 'typeorm';
 import { graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
-import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
+import { addMocksToSchema, makeExecutableSchema } from 'graphql-tools';
 import { RelationMapper } from './RelationMapper';
 import { Product } from '../test/entities/product';
 import { Owner } from '../test/entities/owner';
@@ -31,7 +31,7 @@ describe('RelationMapper', () => {
       typeDefs,
       resolvers,
     });
-    addMockFunctionsToSchema({
+    addMocksToSchema({
       schema: executableSchema,
       mocks: {},
       preserveResolvers: true,
