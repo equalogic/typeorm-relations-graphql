@@ -52,7 +52,7 @@
     "mkdirp": "^1.0.4",
     "np": "^6.2.3",
     "prettier": "^2.0.2",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^5.0.0",
     "ts-jest": "^25.3.1",
     "typeorm": "^0.2.24",
     "typescript": "^3.8.3"
