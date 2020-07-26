@@ -12,7 +12,7 @@
     "url": "https://github.com/madscience/typeorm-graphql-joiner.git"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf dist && npm run barrels:generate",
     "build": "tsc -p tsconfig.build.json",
     "postbuild": "cp package.json README.md dist/",
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
