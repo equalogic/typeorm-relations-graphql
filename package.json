@@ -12,14 +12,14 @@
     "url": "https://github.com/madscience/typeorm-graphql-joiner.git"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf dist && npm run barrels:generate",
     "build": "tsc -p tsconfig.build.json",
     "postbuild": "cp package.json README.md dist/",
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
     "lint:fix": "eslint --ext .ts --ignore-path .gitignore . --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "rimraf test/.results && mkdirp test/.results && jest --ci --runInBand --reporters=default --reporters=jest-junit",
+    "test:ci": "rimraf test/.results && mkdirp test/.results && jest --ci --runInBand",
     "postversion": "npm run postbuild",
     "release": "np",
     "barrels:generate": "barrelsby --config barrelsby.json"
@@ -47,7 +47,6 @@
     "graphql-tools": "^6.0.5",
     "husky": "^4.2.5",
     "jest": "^25.2.7",
-    "jest-junit": "^11.0.1",
     "lint-staged": "^10.2.7",
     "mkdirp": "^1.0.4",
     "np": "^6.2.3",
