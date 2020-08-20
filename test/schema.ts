@@ -98,8 +98,22 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
     ): Promise<(Image | Video)[]> {
       const connection = getConnection();
 
-      const imageRelations = new RelationMapper(connection).buildRelationListForQuery(Image, info);
-      const videoRelations = new RelationMapper(connection).buildRelationListForQuery(Video, info);
+      const mapper = new RelationMapper(connection);
+      const imageRelations = mapper.buildRelationListForQuery(Image, info);
+      const videoRelations = mapper.buildRelationListForQuery(Video, info);
+
+      // TODO: these kind of relations can't be mapped automatically yet
+      if (mapper.isFieldSelected('sizes.small', info)) {
+        imageRelations.add('sizeSmall');
+      }
+
+      if (mapper.isFieldSelected('sizes.medium', info)) {
+        imageRelations.add('sizeMedium');
+      }
+
+      if (mapper.isFieldSelected('sizes.large', info)) {
+        imageRelations.add('sizeLarge');
+      }
 
       const images = await connection.getRepository(Image).find({
         where: {
