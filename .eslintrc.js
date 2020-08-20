@@ -6,15 +6,8 @@ module.exports = {
   parserOptions: {
     parser: '@typescript-eslint/parser',
   },
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-    'prettier',
-  ],
-  plugins: [
-    '@typescript-eslint',
-    'prettier',
-  ],
+  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier'],
   // add your custom rules here
   rules: {
     semi: ['error', 'always'],
