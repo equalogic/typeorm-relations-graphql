@@ -1,10 +1,10 @@
 import { Connection } from 'typeorm';
-import { Owner } from './entities/owner';
-import { Store } from './entities/store';
-import { Product } from './entities/product';
-import { Video } from './entities/video';
 import { Image } from './entities/image';
 import { ImageFile } from './entities/imagefile';
+import { Owner } from './entities/owner';
+import { Product } from './entities/product';
+import { Store } from './entities/store';
+import { Video } from './entities/video';
 
 export interface TestMockData {
   ownerA: Owner;

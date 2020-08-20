@@ -1,7 +1,7 @@
-import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
-import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
+import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
 import { ObjectType } from 'typeorm/index';
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 export class RelationMapper {
   public constructor(private readonly connection: Connection) {}

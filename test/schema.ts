@@ -1,9 +1,9 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { IResolvers } from 'graphql-tools';
 import { getConnection } from 'typeorm';
-import { Product } from './entities/product';
-import { Image, ImageSizeMap } from './entities/image';
 import { RelationMapper } from '../src';
+import { Image, ImageSizeMap } from './entities/image';
+import { Product } from './entities/product';
 import { Video } from './entities/video';
 
 export interface TestResolverContext {
