@@ -9,7 +9,10 @@ export class RelationMapper {
    * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
    * query resolver.
    */
-  public buildRelationListForQuery(entity: Function | EntitySchema<any> | string, info: GraphQLResolveInfo): string[] {
+  public buildRelationListForQuery(
+    entity: Function | EntitySchema<any> | string,
+    info: GraphQLResolveInfo,
+  ): Set<string> {
     const baseNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
 
     if (baseNode == null) {
@@ -27,8 +30,8 @@ export class RelationMapper {
     baseNode: SelectionNode,
     fragments?: { [p: string]: FragmentDefinitionNode },
     basePropertyPath?: string,
-  ): string[] {
-    const relationNames: string[] = [];
+  ): Set<string> {
+    const relationNames = new Set<string>();
     const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
 
     if (selectionSet == null) {
@@ -41,7 +44,8 @@ export class RelationMapper {
       let currentPropertyPath = basePropertyPath;
 
       // find relation metadata, if field corresponds to a relation property
-      const relationMetadata = this.findRelationMetadata(nodeName, entity);
+      // note: nodeName will be null if current node is an inline fragment, in that case we just continue recursion
+      const relationMetadata = nodeName != null ? this.findRelationMetadata(nodeName, entity) : undefined;
 
       if (relationMetadata != null) {
         // build up relation path by appending current property name
@@ -50,7 +54,7 @@ export class RelationMapper {
           : relationMetadata.propertyName;
 
         // add the relation to the list
-        relationNames.push(currentPropertyPath);
+        relationNames.add(currentPropertyPath);
       }
 
       /*
@@ -65,7 +69,7 @@ export class RelationMapper {
         fragments,
         currentPropertyPath,
       );
-      relationNames.push(...nestedRelations);
+      nestedRelations.forEach(nestedRelation => relationNames.add(nestedRelation));
     });
 
     return relationNames;
@@ -125,13 +129,13 @@ export class RelationMapper {
     return this.getRelationsMetadata(entity).find(relationMetadata => relationMetadata.propertyName === nodeName);
   }
 
-  private getNameFromNode(selectionNode: SelectionNode): string {
+  private getNameFromNode(selectionNode: SelectionNode): string | null {
     switch (selectionNode.kind) {
       case 'Field':
       case 'FragmentSpread':
         return selectionNode.name.value;
       case 'InlineFragment':
-        throw new Error('Cannot get node name for an InlineFragment.');
+        return null;
     }
   }
 
@@ -147,13 +151,32 @@ export class RelationMapper {
 
         return fragments[selectionNode.name.value].selectionSet;
       case 'Field':
-        return selectionNode.selectionSet;
       case 'InlineFragment':
-        throw new Error('Support for InlineFragment nodes has not been implemented.'); // TODO: implement InlineFragment support
+        return selectionNode.selectionSet;
     }
   }
 
   private findFieldInSelection(fieldName: string, selectionSet: SelectionSetNode): SelectionNode | undefined {
-    return selectionSet.selections.find(selectionNode => this.getNameFromNode(selectionNode) === fieldName);
+    let foundNode: SelectionNode | undefined = undefined;
+
+    for (const selectionNode of selectionSet.selections) {
+      if (foundNode !== undefined) {
+        break;
+      }
+
+      if (selectionNode.kind === 'InlineFragment') {
+        foundNode = this.findFieldInSelection(fieldName, selectionNode.selectionSet);
+
+        break;
+      }
+
+      if (this.getNameFromNode(selectionNode) === fieldName) {
+        foundNode = selectionNode;
+
+        break;
+      }
+    }
+
+    return foundNode;
   }
 }

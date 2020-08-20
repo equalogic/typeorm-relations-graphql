@@ -7,6 +7,7 @@ import { Owner } from '../test/entities/owner';
 import { Store } from '../test/entities/store';
 import { Image } from '../test/entities/image';
 import { ImageFile } from '../test/entities/imagefile';
+import { Video } from '../test/entities/video';
 import { resolvers, typeDefs } from '../test/schema';
 import { insertMockData, TestMockData } from '../test/data';
 
@@ -20,7 +21,7 @@ describe('RelationMapper', () => {
     connection = await createConnection({
       type: 'sqlite',
       database: 'test/test.sqlite',
-      entities: [Product, Owner, Store, Image, ImageFile],
+      entities: [Product, Owner, Store, Image, ImageFile, Video],
       synchronize: true,
       dropSchema: true,
     });
@@ -61,7 +62,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store']);
+        expect([...relations]).toEqual(['owner', 'store']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -114,7 +115,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store', 'store.owner']);
+        expect([...relations]).toEqual(['owner', 'store', 'store.owner']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -145,7 +146,7 @@ describe('RelationMapper', () => {
       ]);
     });
 
-    it('maps GQL selections containing fragments to ORM relations', async () => {
+    it('maps GQL selections containing spread fragments to ORM relations', async () => {
       // language=GraphQL
       const query = `
         fragment ProductFragment on Product {
@@ -183,7 +184,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store', 'store.owner']);
+        expect([...relations]).toEqual(['owner', 'store', 'store.owner']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -210,6 +211,82 @@ describe('RelationMapper', () => {
               name: mockData.ownerA.name,
             },
           },
+        },
+      ]);
+    });
+
+    it('accepts GQL selections containing inline fragments', async () => {
+      // language=GraphQL
+      const query = `
+        fragment ProductFragment on Product {
+          id
+          name
+          media {
+            ... on Image {
+              id
+              sizes {
+                medium {
+                  id
+                  fileName
+                }
+              }
+              product {
+                id
+              }
+            }
+            ... on Video {
+              id
+              duration
+              product {
+                id
+              }
+            }
+          }
+        }
+
+        query products {
+          products {
+            ...ProductFragment
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+
+        expect([...relations]).toEqual([]);
+      };
+      const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      // check we hit our assertions inside the resolveInfoHook callback
+      expect.assertions(1 + 4);
+
+      // check the query result looks right
+      expect(result).toBeDefined();
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toBeDefined();
+      expect(result.data?.products).toEqual([
+        {
+          id: mockData.productA.id,
+          name: mockData.productA.name,
+          media: [
+            {
+              id: mockData.imageA.id,
+              sizes: {
+                medium: mockData.imageA.sizeMedium,
+              },
+              product: {
+                id: mockData.productA.id,
+              },
+            },
+            {
+              id: mockData.videoA.id,
+              duration: mockData.videoA.duration,
+              product: {
+                id: mockData.productA.id,
+              },
+            },
+          ],
         },
       ]);
     });
