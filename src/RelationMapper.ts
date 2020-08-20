@@ -157,6 +157,26 @@ export class RelationMapper {
   }
 
   private findFieldInSelection(fieldName: string, selectionSet: SelectionSetNode): SelectionNode | undefined {
-    return selectionSet.selections.find(selectionNode => this.getNameFromNode(selectionNode) === fieldName);
+    let foundNode: SelectionNode | undefined = undefined;
+
+    for (const selectionNode of selectionSet.selections) {
+      if (foundNode !== undefined) {
+        break;
+      }
+
+      if (selectionNode.kind === 'InlineFragment') {
+        foundNode = this.findFieldInSelection(fieldName, selectionNode.selectionSet);
+
+        break;
+      }
+
+      if (this.getNameFromNode(selectionNode) === fieldName) {
+        foundNode = selectionNode;
+
+        break;
+      }
+    }
+
+    return foundNode;
   }
 }
