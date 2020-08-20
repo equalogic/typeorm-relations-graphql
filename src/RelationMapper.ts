@@ -41,7 +41,8 @@ export class RelationMapper {
       let currentPropertyPath = basePropertyPath;
 
       // find relation metadata, if field corresponds to a relation property
-      const relationMetadata = this.findRelationMetadata(nodeName, entity);
+      // note: nodeName will be null if current node is an inline fragment, in that case we just continue recursion
+      const relationMetadata = nodeName != null ? this.findRelationMetadata(nodeName, entity) : undefined;
 
       if (relationMetadata != null) {
         // build up relation path by appending current property name
@@ -125,13 +126,13 @@ export class RelationMapper {
     return this.getRelationsMetadata(entity).find(relationMetadata => relationMetadata.propertyName === nodeName);
   }
 
-  private getNameFromNode(selectionNode: SelectionNode): string {
+  private getNameFromNode(selectionNode: SelectionNode): string | null {
     switch (selectionNode.kind) {
       case 'Field':
       case 'FragmentSpread':
         return selectionNode.name.value;
       case 'InlineFragment':
-        throw new Error('Cannot get node name for an InlineFragment.');
+        return null;
     }
   }
 
@@ -147,9 +148,8 @@ export class RelationMapper {
 
         return fragments[selectionNode.name.value].selectionSet;
       case 'Field':
-        return selectionNode.selectionSet;
       case 'InlineFragment':
-        throw new Error('Support for InlineFragment nodes has not been implemented.'); // TODO: implement InlineFragment support
+        return selectionNode.selectionSet;
     }
   }
 
