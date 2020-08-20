@@ -9,7 +9,10 @@ export class RelationMapper {
    * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
    * query resolver.
    */
-  public buildRelationListForQuery(entity: Function | EntitySchema<any> | string, info: GraphQLResolveInfo): string[] {
+  public buildRelationListForQuery(
+    entity: Function | EntitySchema<any> | string,
+    info: GraphQLResolveInfo,
+  ): Set<string> {
     const baseNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
 
     if (baseNode == null) {
@@ -27,8 +30,8 @@ export class RelationMapper {
     baseNode: SelectionNode,
     fragments?: { [p: string]: FragmentDefinitionNode },
     basePropertyPath?: string,
-  ): string[] {
-    const relationNames: string[] = [];
+  ): Set<string> {
+    const relationNames = new Set<string>();
     const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
 
     if (selectionSet == null) {
@@ -51,7 +54,7 @@ export class RelationMapper {
           : relationMetadata.propertyName;
 
         // add the relation to the list
-        relationNames.push(currentPropertyPath);
+        relationNames.add(currentPropertyPath);
       }
 
       /*
@@ -66,7 +69,7 @@ export class RelationMapper {
         fragments,
         currentPropertyPath,
       );
-      relationNames.push(...nestedRelations);
+      nestedRelations.forEach(nestedRelation => relationNames.add(nestedRelation));
     });
 
     return relationNames;

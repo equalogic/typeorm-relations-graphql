@@ -62,7 +62,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store']);
+        expect([...relations]).toEqual(['owner', 'store']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -115,7 +115,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store', 'store.owner']);
+        expect([...relations]).toEqual(['owner', 'store', 'store.owner']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -184,7 +184,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual(['owner', 'store', 'store.owner']);
+        expect([...relations]).toEqual(['owner', 'store', 'store.owner']);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 
@@ -254,7 +254,7 @@ describe('RelationMapper', () => {
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
         const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
-        expect(relations).toEqual([]);
+        expect([...relations]).toEqual([]);
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 

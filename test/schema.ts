@@ -76,7 +76,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       const productRelations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
 
       return connection.getRepository(Product).find({
-        relations: productRelations,
+        relations: [...productRelations],
       });
     },
   },
@@ -105,13 +105,13 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
         where: {
           product: source,
         },
-        relations: imageRelations,
+        relations: [...imageRelations],
       });
       const videos = await connection.getRepository(Video).find({
         where: {
           product: source,
         },
-        relations: videoRelations,
+        relations: [...videoRelations],
       });
 
       return [...images, ...videos];
