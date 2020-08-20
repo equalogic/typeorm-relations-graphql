@@ -1,5 +1,6 @@
 import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ImageFile } from './imagefile';
+import { Product } from './product';
 
 @Entity()
 export class Image {
@@ -14,6 +15,9 @@ export class Image {
 
   @ManyToOne(_type => ImageFile)
   public sizeLarge: ImageFile;
+
+  @ManyToOne(_type => Product)
+  public product: Product;
 }
 
 export interface ImageSizeMap {

@@ -7,6 +7,7 @@ import { Owner } from '../test/entities/owner';
 import { Store } from '../test/entities/store';
 import { Image } from '../test/entities/image';
 import { ImageFile } from '../test/entities/imagefile';
+import { Video } from '../test/entities/video';
 import { resolvers, typeDefs } from '../test/schema';
 import { insertMockData, TestMockData } from '../test/data';
 
@@ -20,7 +21,7 @@ describe('RelationMapper', () => {
     connection = await createConnection({
       type: 'sqlite',
       database: 'test/test.sqlite',
-      entities: [Product, Owner, Store, Image, ImageFile],
+      entities: [Product, Owner, Store, Image, ImageFile, Video],
       synchronize: true,
       dropSchema: true,
     });
