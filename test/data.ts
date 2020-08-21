@@ -87,6 +87,7 @@ export const insertMockData = async (connection: Connection): Promise<TestMockDa
   );
 
   return {
+    countryA,
     ownerA,
     storeA,
     productA,
