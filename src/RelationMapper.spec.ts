@@ -1,15 +1,15 @@
-import { Connection, createConnection } from 'typeorm';
 import { graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
 import { addMocksToSchema, makeExecutableSchema } from 'graphql-tools';
-import { RelationMapper } from './RelationMapper';
-import { Product } from '../test/entities/product';
-import { Owner } from '../test/entities/owner';
-import { Store } from '../test/entities/store';
+import { Connection, createConnection } from 'typeorm';
+import { insertMockData, TestMockData } from '../test/data';
 import { Image } from '../test/entities/image';
 import { ImageFile } from '../test/entities/imagefile';
+import { Owner } from '../test/entities/owner';
+import { Product } from '../test/entities/product';
+import { Store } from '../test/entities/store';
 import { Video } from '../test/entities/video';
 import { resolvers, typeDefs } from '../test/schema';
-import { insertMockData, TestMockData } from '../test/data';
+import { RelationMapper } from './RelationMapper';
 
 describe('RelationMapper', () => {
   let connection: Connection;

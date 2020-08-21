@@ -1,9 +1,9 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { OneToMany } from 'typeorm/index';
+import { Image } from './image';
 import { Owner } from './owner';
 import { Store } from './store';
-import { Image } from './image';
 import { Video } from './video';
-import { OneToMany } from 'typeorm/index';
 
 @Entity()
 export class Product {

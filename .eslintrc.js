@@ -10,11 +10,19 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'prettier',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
   ],
-  plugins: [
-    '@typescript-eslint',
-    'prettier',
-  ],
+  plugins: ['@typescript-eslint', 'prettier', 'import'],
+  settings: {
+    'import/resolver': {
+      // use <root>/tsconfig.json
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+      },
+    },
+  },
   // add your custom rules here
   rules: {
     semi: ['error', 'always'],
@@ -61,13 +69,31 @@ module.exports = {
         allowExpressions: true,
       },
     ],
+    'import/order': [
+      'error',
+      {
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+        pathGroups: [
+          {
+            pattern: '~/**',
+            group: 'internal',
+            position: 'before',
+          },
+        ],
+      },
+    ],
+    'import/default': 'off',
+    'import/named': 'off',
+    'import/no-named-as-default-member': 'off',
   },
   overrides: [
     {
       files: ['*.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {

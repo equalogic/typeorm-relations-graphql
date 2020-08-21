@@ -1,9 +1,9 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { IResolvers } from 'graphql-tools';
 import { getConnection } from 'typeorm';
-import { Product } from './entities/product';
-import { Image, ImageSizeMap } from './entities/image';
 import { RelationMapper } from '../src';
+import { Image, ImageSizeMap } from './entities/image';
+import { Product } from './entities/product';
 import { Video } from './entities/video';
 
 export interface TestResolverContext {
@@ -69,7 +69,12 @@ export const typeDefs = `
 
 export const resolvers: IResolvers<any, TestResolverContext> = {
   Query: {
-    products(source: any, args: any, context: TestResolverContext, info: GraphQLResolveInfo): Promise<Product[]> {
+    products(
+      source: unknown,
+      args: unknown,
+      context: TestResolverContext,
+      info: GraphQLResolveInfo,
+    ): Promise<Product[]> {
       context.resolveInfoHook(info);
 
       const connection = getConnection();
@@ -92,7 +97,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
   Product: {
     async media(
       source: Product,
-      args: any,
+      args: unknown,
       context: TestResolverContext,
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {

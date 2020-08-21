@@ -1,6 +1,7 @@
-import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
-import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
+import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
+import { ObjectType } from 'typeorm/index';
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 export class RelationMapper {
   public constructor(private readonly connection: Connection) {}
@@ -10,7 +11,7 @@ export class RelationMapper {
    * query resolver.
    */
   public buildRelationListForQuery(
-    entity: Function | EntitySchema<any> | string,
+    entity: ObjectType<any> | EntitySchema<any> | string,
     info: GraphQLResolveInfo,
   ): Set<string> {
     const baseNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
@@ -26,7 +27,7 @@ export class RelationMapper {
    * Build the list of matching TypeORM relation property names for an entity, starting at a base SelectionNode.
    */
   public buildRelationList(
-    entity: Function | EntitySchema<any> | string,
+    entity: ObjectType<any> | EntitySchema<any> | string,
     baseNode: SelectionNode,
     fragments?: { [p: string]: FragmentDefinitionNode },
     basePropertyPath?: string,
@@ -113,17 +114,17 @@ export class RelationMapper {
     return fieldPathNodes.find(node => node === null) === undefined;
   }
 
-  private getEntityMetadata(entity: Function | EntitySchema<any> | string): EntityMetadata {
+  private getEntityMetadata(entity: ObjectType<any> | EntitySchema<any> | string): EntityMetadata {
     return this.connection.getMetadata(entity);
   }
 
-  private getRelationsMetadata(entity: Function | EntitySchema<any> | string): RelationMetadata[] {
+  private getRelationsMetadata(entity: ObjectType<any> | EntitySchema<any> | string): RelationMetadata[] {
     return this.getEntityMetadata(entity).relations;
   }
 
   private findRelationMetadata(
     nodeName: string,
-    entity: Function | EntitySchema<any> | string,
+    entity: ObjectType<any> | EntitySchema<any> | string,
   ): RelationMetadata | undefined {
     // find relation metadata, if field corresponds to a relation property
     return this.getRelationsMetadata(entity).find(relationMetadata => relationMetadata.propertyName === nodeName);
