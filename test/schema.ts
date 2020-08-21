@@ -12,9 +12,20 @@ export interface TestResolverContext {
 
 // language=GraphQL
 export const typeDefs = `
+  type Country {
+    id: Int!
+    name: String
+  }
+
+  type Address {
+    street: String
+    country: Country
+  }
+
   type Owner {
     id: Int!
     name: String
+    address: Address
   }
 
   type Product {
