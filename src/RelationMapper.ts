@@ -1,5 +1,6 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
 import { Connection, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
+import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 export class RelationMapper {
@@ -40,34 +41,47 @@ export class RelationMapper {
 
     // look for any relation properties among the selected fields inside the base node
     selectionSet.selections.forEach((selectionNode: SelectionNode) => {
+      const currentPropertyPath: string[] = (basePropertyPath ?? '').split('.').filter(path => path !== '');
+      let currentTargetEntity = entity;
+
       const nodeName = this.getNameFromNode(selectionNode);
-      let currentPropertyPath = basePropertyPath;
 
-      // find relation metadata, if field corresponds to a relation property
-      // note: nodeName will be null if current node is an inline fragment, in that case we just continue recursion
-      const relationMetadata = nodeName != null ? this.findRelationMetadata(nodeName, entity) : undefined;
+      // when the node has a name (i.e. is not an inline fragment), we can look for relations to map
+      if (nodeName != null) {
+        // remove first element from path (the path of this field on the entity should not include the entity itself)
+        const currentPropertyPathExcludingFirstElement = [...currentPropertyPath];
+        currentPropertyPathExcludingFirstElement.shift();
 
-      if (relationMetadata != null) {
-        // build up relation path by appending current property name
-        currentPropertyPath = basePropertyPath
-          ? `${basePropertyPath}.${relationMetadata.propertyName}`
-          : relationMetadata.propertyName;
+        // then add the current node name to the end of the path
+        const propPath = [...currentPropertyPathExcludingFirstElement, nodeName].join('.');
 
-        // add the relation to the list
-        relationNames.add(currentPropertyPath);
+        // find relation or embedded entity metadata, if field corresponds to such a property on the entity
+        const propMetadata =
+          this.getEntityMetadata(currentTargetEntity).findRelationWithPropertyPath(propPath) ||
+          this.getEntityMetadata(currentTargetEntity).findEmbeddedWithPropertyPath(propPath);
+
+        if (propMetadata != null) {
+          if (propMetadata instanceof RelationMetadata) {
+            currentTargetEntity = propMetadata.inverseEntityMetadata.target;
+            currentPropertyPath.push(propMetadata.propertyName);
+            relationNames.add(currentPropertyPath.join('.'));
+          } else if (propMetadata instanceof EmbeddedMetadata) {
+            currentPropertyPath.push(propMetadata.propertyPath);
+          }
+        }
       }
 
       /*
-       * Note: if the field is not a relation property it's still possible that its children contain further
+       * Note: if the field is not a mapped property it's still possible that its children contain further
        * relation properties, so we continue to recurse as long as there are nested selection sets.
        */
 
       // recursively map nested relations
       const nestedRelations = this.buildRelationList(
-        relationMetadata ? relationMetadata.inverseEntityMetadata.target : entity,
+        currentTargetEntity,
         selectionNode,
         fragments,
-        currentPropertyPath,
+        currentPropertyPath.join('.'),
       );
       nestedRelations.forEach(nestedRelation => relationNames.add(nestedRelation));
     });
@@ -115,18 +129,6 @@ export class RelationMapper {
 
   private getEntityMetadata(entity: ObjectType<any> | EntitySchema<any> | string): EntityMetadata {
     return this.connection.getMetadata(entity);
-  }
-
-  private getRelationsMetadata(entity: ObjectType<any> | EntitySchema<any> | string): RelationMetadata[] {
-    return this.getEntityMetadata(entity).relations;
-  }
-
-  private findRelationMetadata(
-    nodeName: string,
-    entity: ObjectType<any> | EntitySchema<any> | string,
-  ): RelationMetadata | undefined {
-    // find relation metadata, if field corresponds to a relation property
-    return this.getRelationsMetadata(entity).find(relationMetadata => relationMetadata.propertyName === nodeName);
   }
 
   private getNameFromNode(selectionNode: SelectionNode): string | null {
