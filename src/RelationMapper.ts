@@ -1,6 +1,5 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
-import { Connection, EntityMetadata, EntitySchema } from 'typeorm';
-import { ObjectType } from 'typeorm/index';
+import { Connection, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 export class RelationMapper {
