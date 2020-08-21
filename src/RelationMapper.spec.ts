@@ -114,8 +114,111 @@ describe('RelationMapper', () => {
               owner {
                 id
                 name
+                address {
+                  street
+                  country {
+                    id
+                    name
+                  }
+                }
               }
             }
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+
+        expect([...relations]).toEqual([
+          'owner',
+          'owner.address.country',
+          'store',
+          'store.owner',
+          'store.owner.address.country',
+        ]);
+      };
+      const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      // check we hit our assertions inside the resolveInfoHook callback
+      expect.assertions(1 + 4);
+
+      // check the query result looks right
+      expect(result).toBeDefined();
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toBeDefined();
+      expect(result.data?.products).toEqual([
+        {
+          id: expect.any(Number),
+          name: mockData.productA.name,
+          owner: {
+            id: expect.any(Number),
+            name: mockData.ownerA.name,
+            address: {
+              street: mockData.ownerA.address.street,
+              country: {
+                id: mockData.countryA.id,
+                name: mockData.countryA.name,
+              },
+            },
+          },
+          store: {
+            id: expect.any(Number),
+            name: mockData.storeA.name,
+            owner: {
+              id: expect.any(Number),
+              name: mockData.ownerA.name,
+              address: {
+                street: mockData.ownerA.address.street,
+                country: {
+                  id: mockData.countryA.id,
+                  name: mockData.countryA.name,
+                },
+              },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('maps GQL selections containing spread fragments to ORM relations', async () => {
+      // language=GraphQL
+      const query = `
+        fragment ProductFragment on Product {
+          id
+          name
+          owner {
+            ...OwnerFragment
+          }
+          store {
+            ...StoreFragment
+          }
+        }
+
+        fragment OwnerFragment on Owner {
+          id
+          name
+          address {
+            street
+            country {
+              id
+              name
+            }
+          }
+        }
+
+        fragment StoreFragment on Store {
+          id
+          name
+          owner {
+            id
+            name
+          }
+        }
+
+        query products {
+          products {
+            ...ProductFragment
           }
         }
       `;
@@ -148,75 +251,6 @@ describe('RelationMapper', () => {
                 name: mockData.countryA.name,
               },
             },
-          },
-          store: {
-            id: expect.any(Number),
-            name: mockData.storeA.name,
-            owner: {
-              id: expect.any(Number),
-              name: mockData.ownerA.name,
-            },
-          },
-        },
-      ]);
-    });
-
-    it('maps GQL selections containing spread fragments to ORM relations', async () => {
-      // language=GraphQL
-      const query = `
-        fragment ProductFragment on Product {
-          id
-          name
-          owner {
-            ...OwnerFragment
-          }
-          store {
-            ...StoreFragment
-          }
-        }
-
-        fragment OwnerFragment on Owner {
-          id
-          name
-        }
-
-        fragment StoreFragment on Store {
-          id
-          name
-          owner {
-            id
-            name
-          }
-        }
-
-        query products {
-          products {
-            ...ProductFragment
-          }
-        }
-      `;
-
-      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
-
-        expect([...relations]).toEqual(['owner', 'store', 'store.owner']);
-      };
-      const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
-
-      // check we hit our assertions inside the resolveInfoHook callback
-      expect.assertions(1 + 4);
-
-      // check the query result looks right
-      expect(result).toBeDefined();
-      expect(result.errors).toBeUndefined();
-      expect(result.data).toBeDefined();
-      expect(result.data?.products).toEqual([
-        {
-          id: expect.any(Number),
-          name: mockData.productA.name,
-          owner: {
-            id: expect.any(Number),
-            name: mockData.ownerA.name,
           },
           store: {
             id: expect.any(Number),
