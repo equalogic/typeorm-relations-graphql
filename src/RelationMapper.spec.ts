@@ -2,6 +2,7 @@ import { graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
 import { addMocksToSchema, makeExecutableSchema } from 'graphql-tools';
 import { Connection, createConnection } from 'typeorm';
 import { insertMockData, TestMockData } from '../test/data';
+import { Country } from '../test/entities/country';
 import { Image } from '../test/entities/image';
 import { ImageFile } from '../test/entities/imagefile';
 import { Owner } from '../test/entities/owner';
@@ -21,7 +22,7 @@ describe('RelationMapper', () => {
     connection = await createConnection({
       type: 'sqlite',
       database: 'test/test.sqlite',
-      entities: [Product, Owner, Store, Image, ImageFile, Video],
+      entities: [Country, Product, Owner, Store, Image, ImageFile, Video],
       synchronize: true,
       dropSchema: true,
     });

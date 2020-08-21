@@ -1,4 +1,5 @@
 import { Connection } from 'typeorm';
+import { Country } from './entities/country';
 import { Image } from './entities/image';
 import { ImageFile } from './entities/imagefile';
 import { Owner } from './entities/owner';
@@ -7,6 +8,7 @@ import { Store } from './entities/store';
 import { Video } from './entities/video';
 
 export interface TestMockData {
+  countryA: Country;
   ownerA: Owner;
   storeA: Store;
   productA: Product;
@@ -15,6 +17,7 @@ export interface TestMockData {
 }
 
 export const insertMockData = async (connection: Connection): Promise<TestMockData> => {
+  const countryRepo = connection.getRepository(Country);
   const ownerRepo = connection.getRepository(Owner);
   const storeRepo = connection.getRepository(Store);
   const productRepo = connection.getRepository(Product);
@@ -22,8 +25,19 @@ export const insertMockData = async (connection: Connection): Promise<TestMockDa
   const imageFileRepo = connection.getRepository(ImageFile);
   const videoRepo = connection.getRepository(Video);
 
+  // COUNTRIES
+  const countryA = await countryRepo.save(countryRepo.create({ name: 'Country A' }));
+
   // OWNERS
-  const ownerA = await ownerRepo.save(ownerRepo.create({ name: 'Owner A' }));
+  const ownerA = await ownerRepo.save(
+    ownerRepo.create({
+      name: 'Owner A',
+      address: {
+        street: 'Street',
+        country: countryA,
+      },
+    }),
+  );
 
   // STORES
   const storeA = await storeRepo.save(
