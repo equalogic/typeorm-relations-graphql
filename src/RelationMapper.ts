@@ -31,6 +31,7 @@ export class RelationMapper {
     baseNode: SelectionNode,
     fragments?: { [p: string]: FragmentDefinitionNode },
     basePropertyPath?: string,
+    currentLevel: number = 0,
   ): Set<string> {
     const relationNames = new Set<string>();
     const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
@@ -43,17 +44,18 @@ export class RelationMapper {
     selectionSet.selections.forEach((selectionNode: SelectionNode) => {
       const currentPropertyPath: string[] = (basePropertyPath ?? '').split('.').filter(path => path !== '');
       let currentTargetEntity = entity;
+      let nextLevel: number = currentLevel;
 
       const nodeName = this.getNameFromNode(selectionNode);
 
       // when the node has a name (i.e. is not an inline fragment), we can look for relations to map
       if (nodeName != null) {
-        // remove first element from path (the path of this field on the entity should not include the entity itself)
-        const currentPropertyPathExcludingFirstElement = [...currentPropertyPath];
-        currentPropertyPathExcludingFirstElement.shift();
+        // remove elements from path up to the level of the current entity
+        const currentPropertyPathExcludingEntity = [...currentPropertyPath];
+        currentPropertyPathExcludingEntity.splice(0, currentLevel);
 
         // then add the current node name to the end of the path
-        const propPath = [...currentPropertyPathExcludingFirstElement, nodeName].join('.');
+        const propPath = [...currentPropertyPathExcludingEntity, nodeName].join('.');
 
         // find relation or embedded entity metadata, if field corresponds to such a property on the entity
         const propMetadata =
@@ -63,6 +65,7 @@ export class RelationMapper {
         if (propMetadata != null) {
           if (propMetadata instanceof RelationMetadata) {
             currentTargetEntity = propMetadata.inverseEntityMetadata.target;
+            nextLevel = currentLevel + 1;
             currentPropertyPath.push(propMetadata.propertyName);
             relationNames.add(currentPropertyPath.join('.'));
           } else if (propMetadata instanceof EmbeddedMetadata) {
@@ -82,6 +85,7 @@ export class RelationMapper {
         selectionNode,
         fragments,
         currentPropertyPath.join('.'),
+        nextLevel,
       );
       nestedRelations.forEach(nestedRelation => relationNames.add(nestedRelation));
     });
