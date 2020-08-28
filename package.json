@@ -46,7 +46,7 @@
     "graphql-tools": "6.0.18",
     "husky": "4.2.5",
     "jest": "26.4.2",
-    "lint-staged": "10.2.11",
+    "lint-staged": "10.2.13",
     "mkdirp": "1.0.4",
     "np": "6.4.0",
     "prettier": "2.0.5",
