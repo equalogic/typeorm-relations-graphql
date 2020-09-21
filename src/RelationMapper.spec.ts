@@ -181,6 +181,69 @@ describe('RelationMapper', () => {
       ]);
     });
 
+    it('maps non-root level GQL selections (using field path) to ORM relations', async () => {
+      // language=GraphQL
+      const query = `
+        query products {
+          products {
+            id
+            name
+            store {
+              id
+              name
+              owner {
+                id
+                name
+                address {
+                  street
+                  country {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const relations = new RelationMapper(connection).buildRelationListForQuery(Store, info, 'store');
+
+        expect([...relations]).toEqual(['owner', 'owner.address.country']);
+      };
+      const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      // check we hit our assertions inside the resolveInfoHook callback
+      expect.assertions(1 + 4);
+
+      // check the query result looks right
+      expect(result).toBeDefined();
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toBeDefined();
+      expect(result.data?.products).toEqual([
+        {
+          id: expect.any(Number),
+          name: mockData.productA.name,
+          store: {
+            id: expect.any(Number),
+            name: mockData.storeA.name,
+            owner: {
+              id: expect.any(Number),
+              name: mockData.ownerA.name,
+              address: {
+                street: mockData.ownerA.address.street,
+                country: {
+                  id: mockData.countryA.id,
+                  name: mockData.countryA.name,
+                },
+              },
+            },
+          },
+        },
+      ]);
+    });
+
     it('maps GQL selections containing spread fragments to ORM relations', async () => {
       // language=GraphQL
       const query = `
