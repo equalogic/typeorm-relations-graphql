@@ -1,4 +1,4 @@
-import { graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
+import { FieldNode, graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
 import { addMocksToSchema, makeExecutableSchema } from 'graphql-tools';
 import { Connection, createConnection } from 'typeorm';
 import { insertMockData, TestMockData } from '../test/data';
@@ -338,6 +338,114 @@ describe('RelationMapper', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('findQueryNode()', () => {
+    it('finds simple nested field selections', async () => {
+      // language=GraphQL
+      const query = `
+        query products {
+          products {
+            id
+            name
+            owner {
+              id
+              name
+            }
+            store {
+              id
+              name
+              owner {
+                id
+                name
+              }
+            }
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const mapper = new RelationMapper(connection);
+
+        expect(mapper.findQueryNode('invalidField', info)).toBeNull();
+        expect(mapper.findQueryNode('name', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'name' },
+        });
+        expect(mapper.findQueryNode('owner', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'owner' },
+        });
+        expect(mapper.findQueryNode('owner.name', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'name' },
+        });
+        expect(mapper.findQueryNode('store', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'store' },
+        });
+        expect(mapper.findQueryNode('store.name', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'name' },
+        });
+        expect(mapper.findQueryNode('store.owner', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'owner' },
+        });
+        expect(mapper.findQueryNode('store.owner.name', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'name' },
+        });
+      };
+      await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      expect.assertions(8);
+    });
+
+    it('finds nested non-entity relations', async () => {
+      // language=GraphQL
+      const query = `
+        query products {
+          products {
+            id
+            name
+            images {
+              sizes {
+                medium {
+                  id
+                  fileName
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const mapper = new RelationMapper(connection);
+
+        expect(mapper.findQueryNode('name', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'name' },
+        });
+        expect(mapper.findQueryNode('images.sizes', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'sizes' },
+        });
+        expect(mapper.findQueryNode('images.sizes.small', info)).toBeNull();
+        expect(mapper.findQueryNode('images.sizes.medium', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'medium' },
+        });
+        expect(mapper.findQueryNode('images.sizes.medium.fileName', info)).toMatchObject<FieldNode>({
+          kind: 'Field',
+          name: { kind: 'Name', value: 'fileName' },
+        });
+      };
+      await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      expect.assertions(5);
     });
   });
 
