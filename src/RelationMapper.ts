@@ -13,11 +13,18 @@ export class RelationMapper {
   public buildRelationListForQuery(
     entity: ObjectType<any> | EntitySchema<any> | string,
     info: GraphQLResolveInfo,
+    path?: string,
   ): Set<string> {
-    const baseNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
+    const rootNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
+
+    if (rootNode == null) {
+      throw new Error(`Could not locate field named "${info.fieldName}" in query info"`);
+    }
+
+    const baseNode = path != null ? this.findQueryNode(path, info) : rootNode;
 
     if (baseNode == null) {
-      throw new Error(`Could not locate field named "${info.fieldName}" in query info"`);
+      throw new Error(`Could not locate field named "${path}" in query info"`);
     }
 
     return this.buildRelationList(entity, baseNode, info.fragments);
