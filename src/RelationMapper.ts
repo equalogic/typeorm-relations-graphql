@@ -94,10 +94,10 @@ export class RelationMapper {
   }
 
   /*
-   * Returns true if the referenced field was selected in the GraphQL query, or false if it's not found.
+   * Returns the SelectionNode for referenced field if it was selected in the GraphQL query, or null if it's not found.
    * `fieldPath` can locate nested fields using dotted 'parentField.childField.grandchildField' notation.
    */
-  public isFieldSelected(fieldPath: string, info: GraphQLResolveInfo): boolean {
+  public findQueryNode(fieldPath: string, info: GraphQLResolveInfo): SelectionNode | null {
     const baseNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
 
     if (baseNode == null) {
@@ -108,11 +108,11 @@ export class RelationMapper {
     const fieldPathNodes: (SelectionNode | null)[] = [];
 
     // loop through each level of the path and find the matching selection node, if it's selected
-    fieldPath.split('.').forEach(fieldName => {
+    fieldPath.split('.').forEach((fieldName): void => {
       const selectionSet = this.getSelectionSetFromNode(currentBaseNode, info.fragments);
 
       if (selectionSet == null) {
-        return false;
+        return;
       }
 
       const foundNode = this.findFieldInSelection(fieldName, selectionSet);
@@ -127,8 +127,25 @@ export class RelationMapper {
       currentBaseNode = foundNode;
     });
 
-    // if there are NO nulls in the array then we successfully found selection nodes at every level of the field path
-    return fieldPathNodes.find(node => node === null) === undefined;
+    // in case of a bad field path
+    if (fieldPathNodes.length === 0) {
+      return null;
+    }
+
+    // if there are nulls in the array then we did not find selection nodes at every level of the field path
+    if (fieldPathNodes.filter(node => node === null).length > 0) {
+      return null;
+    }
+
+    return fieldPathNodes[fieldPathNodes.length - 1];
+  }
+
+  /*
+   * Returns true if the referenced field was selected in the GraphQL query, or false if it's not found.
+   * `fieldPath` can locate nested fields using dotted 'parentField.childField.grandchildField' notation.
+   */
+  public isFieldSelected(fieldPath: string, info: GraphQLResolveInfo): boolean {
+    return this.findQueryNode(fieldPath, info) != null;
   }
 
   private getEntityMetadata(entity: ObjectType<any> | EntitySchema<any> | string): EntityMetadata {
