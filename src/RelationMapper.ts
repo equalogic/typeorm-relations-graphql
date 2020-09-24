@@ -36,7 +36,7 @@ export class RelationMapper {
   public buildRelationList(
     entity: ObjectType<any> | EntitySchema<any> | string,
     baseNode: SelectionNode,
-    fragments?: { [p: string]: FragmentDefinitionNode },
+    fragments?: Record<string, FragmentDefinitionNode>,
     basePropertyPath?: string,
     currentLevel: number = 0,
   ): Set<string> {
@@ -171,7 +171,7 @@ export class RelationMapper {
 
   private getSelectionSetFromNode(
     selectionNode: SelectionNode,
-    fragments?: { [p: string]: FragmentDefinitionNode },
+    fragments?: Record<string, FragmentDefinitionNode>,
   ): SelectionSetNode | undefined {
     switch (selectionNode.kind) {
       case 'FragmentSpread':
