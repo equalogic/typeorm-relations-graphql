@@ -70,8 +70,8 @@ First, create a `RelationMapper` instance, passing in a TypeORM `Connection` obj
 metadata):
 
 ```ts
-import { RelationMapper } from '@madsci/typeorm-graphql-joiner';
 import { getConnection } from 'typeorm';
+import { RelationMapper } from 'typeorm-graphql-joiner';
 
 const relationMapper = new RelationMapper(getConnection());
 ```
