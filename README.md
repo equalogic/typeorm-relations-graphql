@@ -54,7 +54,7 @@ TypeORM-GraphQL-Joiner only joins relations that were requested in the client's 
 ## Installation
 
 ```
-npm i @madsci/typeorm-graphql-joiner
+npm i typeorm-graphql-joiner
 ```
 
 This library is written in TypeScript, so type definitions are included in the box.

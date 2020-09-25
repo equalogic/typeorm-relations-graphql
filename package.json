@@ -1,5 +1,5 @@
 {
-  "name": "@madsci/typeorm-graphql-joiner",
+  "name": "typeorm-graphql-joiner",
   "version": "0.3.1",
   "description": "A helper to join TypeORM relations based on fields selected in a GraphQL query.",
   "author": "Madscience Ltd",
