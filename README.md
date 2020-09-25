@@ -3,11 +3,13 @@ Builds a list of TypeORM entity relations to be joined based on object fields se
 
 When your GraphQL server is backed by TypeORM entities, you may have object relationships like the following example:
 
-```json
+```json5
 {
+  // Product entity
   "product": {
     "id": "1234",
     "name": "Some product",
+    // nested Owner entity
     "owner": {
       "id": "4321",
       "name": "Some owner"
@@ -45,7 +47,7 @@ You can optimize it to:
 SELECT * FROM product LEFT JOIN owner ON product.id = owner.product_id;
 ```
 
-The value of this optimization increases as you have greater levels of nesting.
+The value of this optimization increases as you have greater levels of nesting, of course.
 
 You could join these relations manually (or eagerly) with TypeORM, but then you are likely to end up overfetching -
 retrieving relations that were not requested by the client and producing SQL that is more expensive than necessary.
@@ -59,7 +61,7 @@ npm i typeorm-graphql-joiner
 
 This library is written in TypeScript, so type definitions are included in the box.
 
-Your project must also install the following as peer dependencies (but you should have them already):
+Your project must also install the following as peer dependencies (you should have them already):
 
 - [typeorm](https://typeorm.io/)
 - [graphql](https://www.npmjs.com/package/graphql)
@@ -108,7 +110,8 @@ adding or removing relations without worrying about creating duplicate entries.
 
 In some cases you may need to map relations to entity fields where the GQL object type for the entity is not the root
 node in the query. A common example of this is in a mutation which returns a payload object containing the modified
-object. In this case you can pass a `path` string as the last argument to `buildRelationListForQuery`:
+object rather than the object directly. In this case you can pass a `path` string as the last argument to
+`buildRelationListForQuery`:
 
 ```ts
 import { GraphQLResolveInfo } from 'graphql';
