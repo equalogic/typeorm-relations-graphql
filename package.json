@@ -49,7 +49,7 @@
     "lint-staged": "10.5.1",
     "mkdirp": "1.0.4",
     "np": "7.0.0",
-    "prettier": "2.1.2",
+    "prettier": "2.2.0",
     "sqlite3": "5.0.0",
     "ts-jest": "26.4.4",
     "typeorm": "0.2.29",
