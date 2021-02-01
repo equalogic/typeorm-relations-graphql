@@ -51,7 +51,7 @@
     "np": "7.2.0",
     "prettier": "2.2.1",
     "sqlite3": "5.0.1",
-    "ts-jest": "26.4.4",
+    "ts-jest": "26.5.0",
     "typeorm": "0.2.30",
     "typescript": "4.1.3"
   },
