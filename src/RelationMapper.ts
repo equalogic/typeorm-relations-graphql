@@ -122,7 +122,7 @@ export class RelationMapper {
         return;
       }
 
-      const foundNode = this.findFieldInSelection(fieldName, selectionSet);
+      const foundNode = this.findFieldInSelection(fieldName, selectionSet, info.fragments);
 
       if (foundNode == null) {
         fieldPathNodes.push(null);
@@ -186,7 +186,11 @@ export class RelationMapper {
     }
   }
 
-  private findFieldInSelection(fieldName: string, selectionSet: SelectionSetNode): SelectionNode | undefined {
+  private findFieldInSelection(
+    fieldName: string,
+    selectionSet: SelectionSetNode,
+    fragments?: Record<string, FragmentDefinitionNode>,
+  ): SelectionNode | undefined {
     let foundNode: SelectionNode | undefined = undefined;
 
     for (const selectionNode of selectionSet.selections) {
@@ -194,8 +198,14 @@ export class RelationMapper {
         break;
       }
 
-      if (selectionNode.kind === 'InlineFragment') {
-        foundNode = this.findFieldInSelection(fieldName, selectionNode.selectionSet);
+      if (selectionNode.kind === 'InlineFragment' || selectionNode.kind === 'FragmentSpread') {
+        const selectionSet = this.getSelectionSetFromNode(selectionNode, fragments);
+
+        if (selectionSet === undefined) {
+          break;
+        }
+
+        foundNode = this.findFieldInSelection(fieldName, selectionSet, fragments);
 
         break;
       }

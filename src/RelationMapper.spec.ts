@@ -585,5 +585,64 @@ describe('RelationMapper', () => {
 
       expect.assertions(5);
     });
+
+    it('finds fields in spread fragments nested within inline fragments', async () => {
+      // language=GraphQL
+      const query = `
+        fragment ImageFragment on Image {
+          id
+          sizes {
+            medium {
+              id
+              fileName
+            }
+          }
+          product {
+            id
+          }
+        }
+
+        fragment VideoFragment on Video {
+          id
+          duration
+          product {
+            id
+          }
+        }
+
+        fragment ProductFragment on Product {
+          id
+          name
+          media {
+            ... on Image {
+              ...ImageFragment
+            }
+            ... on Video {
+              ...VideoFragment
+            }
+          }
+        }
+
+        query products {
+          products {
+            ...ProductFragment
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const mapper = new RelationMapper(connection);
+
+        expect(mapper.isFieldSelected('media', info)).toBe(true);
+        expect(mapper.isFieldSelected('media.sizes', info)).toBe(true);
+        expect(mapper.isFieldSelected('media.sizes.small', info)).toBe(false);
+        expect(mapper.isFieldSelected('media.sizes.medium', info)).toBe(true);
+        expect(mapper.isFieldSelected('media.sizes.medium.fileName', info)).toBe(true);
+        expect(mapper.isFieldSelected('media.duration', info)).toBe(true);
+      };
+      await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      expect.assertions(6);
+    });
   });
 });
