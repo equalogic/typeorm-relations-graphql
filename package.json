@@ -2,14 +2,14 @@
   "name": "typeorm-graphql-joiner",
   "version": "1.0.1",
   "description": "A helper to join TypeORM relations based on fields selected in a GraphQL query.",
-  "author": "Madscience Ltd",
+  "author": "Equalogic Ltd",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/madscience/typeorm-graphql-joiner.git"
+    "url": "https://github.com/equalogic/typeorm-graphql-joiner.git"
   },
   "scripts": {
     "prebuild": "rimraf dist && npm run barrels:generate",
