@@ -1,5 +1,4 @@
 # TypeORM-GraphQL-Joiner
-
 Builds a list of TypeORM entity relations to be joined based on object fields selected in a GraphQL query.
 
 When your GraphQL server is backed by TypeORM entities, you may have object relationships like the following example:
@@ -7,15 +6,15 @@ When your GraphQL server is backed by TypeORM entities, you may have object rela
 ```json5
 {
   // Product entity
-  product: {
-    id: '1234',
-    name: 'Some product',
+  "product": {
+    "id": "1234",
+    "name": "Some product",
     // nested Owner entity
-    owner: {
-      id: '4321',
-      name: 'Some owner',
-    },
-  },
+    "owner": {
+      "id": "4321",
+      "name": "Some owner"
+    }
+  }
 }
 ```
 
@@ -118,12 +117,7 @@ object rather than the object directly. In this case you can pass a `path` strin
 import { GraphQLResolveInfo } from 'graphql';
 
 // Example resolver function for a "createProduct" mutation in your GQL schema
-async function createProduct(
-  source: any,
-  args: any,
-  context: any,
-  info: GraphQLResolveInfo,
-): Promise<CreateProductPayload> {
+async function createProduct(source: any, args: any, context: any, info: GraphQLResolveInfo): Promise<CreateProductPayload> {
   const connection = getConnection();
   const relationMapper = new RelationMapper(connection);
 
