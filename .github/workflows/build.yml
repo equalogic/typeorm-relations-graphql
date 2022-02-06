@@ -40,6 +40,7 @@ jobs:
         with:
           name: node_modules.tar.zstd
           path: node_modules.tar.zstd
+          retention-days: 2
 
   #
   # lint job
