@@ -15,18 +15,9 @@
     "strictNullChecks": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-    },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./@types"
-    ]
+    "paths": {},
+    "typeRoots": ["./node_modules/@types", "./@types"]
   },
-  "include":[
-    "src/**/*",
-    "test/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
 }
