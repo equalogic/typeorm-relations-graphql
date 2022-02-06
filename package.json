@@ -44,9 +44,7 @@
     "eslint-plugin-promise": "6.0.0",
     "graphql": "15.8.0",
     "graphql-tools": "7.0.5",
-    "husky": "7.0.4",
     "jest": "27.4.7",
-    "lint-staged": "12.3.3",
     "mkdirp": "1.0.4",
     "np": "7.6.0",
     "prettier": "2.5.1",
@@ -60,13 +58,5 @@
     "outputName": "junit.xml"
   },
   "main": "index.js",
-  "types": "index.d.ts",
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run barrels:generate && lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,js}": "eslint --cache --fix"
-  }
+  "types": "index.d.ts"
 }
