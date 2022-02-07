@@ -1,5 +1,6 @@
+import { addMocksToSchema } from '@graphql-tools/mock';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import { FieldNode, graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
-import { addMocksToSchema, makeExecutableSchema } from 'graphql-tools';
 import { Connection, createConnection } from 'typeorm';
 import { insertMockData, TestMockData } from '../test/data';
 import { Country } from '../test/entities/country';

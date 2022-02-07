@@ -1,5 +1,5 @@
+import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
-import { IResolvers } from 'graphql-tools';
 import { getConnection } from 'typeorm';
 import { RelationMapper } from '../src';
 import { Image, ImageSizeMap } from './entities/image';
