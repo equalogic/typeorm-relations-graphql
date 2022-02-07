@@ -165,6 +165,7 @@ export class RelationMapper {
       case 'FragmentSpread':
         return selectionNode.name.value;
       case 'InlineFragment':
+      default:
         return null;
     }
   }
