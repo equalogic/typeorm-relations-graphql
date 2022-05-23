@@ -30,9 +30,9 @@
     "typeorm": "^0.2.24 || ^0.3.0"
   },
   "devDependencies": {
-    "@graphql-tools/mock": "8.6.9",
-    "@graphql-tools/schema": "8.3.11",
-    "@graphql-tools/utils": "8.6.10",
+    "@graphql-tools/mock": "8.6.11",
+    "@graphql-tools/schema": "8.3.13",
+    "@graphql-tools/utils": "8.6.12",
     "@types/jest": "27.5.1",
     "@types/node": "16.11.36",
     "@typescript-eslint/eslint-plugin": "5.25.0",
