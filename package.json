@@ -52,7 +52,7 @@
     "sqlite3": "5.0.8",
     "ts-jest": "28.0.3",
     "typeorm": "0.3.6",
-    "typescript": "4.6.4"
+    "typescript": "4.7.2"
   },
   "jest-junit": {
     "outputDirectory": "./test/.results",
