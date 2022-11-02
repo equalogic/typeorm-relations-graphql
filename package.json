@@ -29,7 +29,7 @@
   },
   "peerDependencies": {
     "graphql": ">=14.6.0",
-    "typeorm": "^0.2.24 || ^0.3.0"
+    "typeorm": "^0.3.0"
   },
   "devDependencies": {
     "@graphql-tools/mock": "8.7.8",
