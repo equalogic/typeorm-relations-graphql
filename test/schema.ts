@@ -1,7 +1,7 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
-import { getConnection } from 'typeorm';
 import { RelationMapper } from '../src';
+import { dataSource } from './data';
 import { Image, ImageSizeMap } from './entities/image';
 import { Product } from './entities/product';
 import { Video } from './entities/video';
@@ -88,10 +88,9 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
     ): Promise<Product[]> {
       context.resolveInfoHook(info);
 
-      const connection = getConnection();
-      const productRelations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+      const productRelations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
-      return connection.getRepository(Product).find({
+      return dataSource.getRepository(Product).find({
         relations: [...productRelations],
       });
     },
@@ -112,9 +111,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       context: TestResolverContext,
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {
-      const connection = getConnection();
-
-      const mapper = new RelationMapper(connection);
+      const mapper = new RelationMapper(dataSource);
       const imageRelations = mapper.buildRelationListForQuery(Image, info);
       const videoRelations = mapper.buildRelationListForQuery(Video, info);
 
@@ -131,13 +128,13 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
         imageRelations.add('sizeLarge');
       }
 
-      const images = await connection.getRepository(Image).find({
+      const images = await dataSource.getRepository(Image).find({
         where: {
           product: source,
         },
         relations: [...imageRelations],
       });
-      const videos = await connection.getRepository(Video).find({
+      const videos = await dataSource.getRepository(Video).find({
         where: {
           product: source,
         },

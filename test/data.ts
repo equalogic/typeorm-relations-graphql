@@ -1,4 +1,4 @@
-import { Connection } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Country } from './entities/country';
 import { Image } from './entities/image';
 import { ImageFile } from './entities/imagefile';
@@ -6,6 +6,14 @@ import { Owner } from './entities/owner';
 import { Product } from './entities/product';
 import { Store } from './entities/store';
 import { Video } from './entities/video';
+
+export const dataSource = new DataSource({
+  type: 'sqlite',
+  database: 'test/test.sqlite',
+  entities: [Country, Product, Owner, Store, Image, ImageFile, Video],
+  synchronize: true,
+  dropSchema: true,
+});
 
 export interface TestMockData {
   countryA: Country;
@@ -16,14 +24,14 @@ export interface TestMockData {
   videoA: Video;
 }
 
-export const insertMockData = async (connection: Connection): Promise<TestMockData> => {
-  const countryRepo = connection.getRepository(Country);
-  const ownerRepo = connection.getRepository(Owner);
-  const storeRepo = connection.getRepository(Store);
-  const productRepo = connection.getRepository(Product);
-  const imageRepo = connection.getRepository(Image);
-  const imageFileRepo = connection.getRepository(ImageFile);
-  const videoRepo = connection.getRepository(Video);
+export const insertMockData = async (dataSource: DataSource): Promise<TestMockData> => {
+  const countryRepo = dataSource.getRepository(Country);
+  const ownerRepo = dataSource.getRepository(Owner);
+  const storeRepo = dataSource.getRepository(Store);
+  const productRepo = dataSource.getRepository(Product);
+  const imageRepo = dataSource.getRepository(Image);
+  const imageFileRepo = dataSource.getRepository(ImageFile);
+  const videoRepo = dataSource.getRepository(Video);
 
   // COUNTRIES
   const countryA = await countryRepo.save(countryRepo.create({ name: 'Country A' }));

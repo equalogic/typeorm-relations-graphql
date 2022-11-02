@@ -1,33 +1,20 @@
 import { addMocksToSchema } from '@graphql-tools/mock';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { FieldNode, graphql, GraphQLResolveInfo, GraphQLSchema } from 'graphql';
-import { Connection, createConnection } from 'typeorm';
-import { insertMockData, TestMockData } from '../test/data';
-import { Country } from '../test/entities/country';
-import { Image } from '../test/entities/image';
-import { ImageFile } from '../test/entities/imagefile';
-import { Owner } from '../test/entities/owner';
+import { dataSource, insertMockData, TestMockData } from '../test/data';
 import { Product } from '../test/entities/product';
 import { Store } from '../test/entities/store';
-import { Video } from '../test/entities/video';
 import { resolvers, typeDefs } from '../test/schema';
 import { RelationMapper } from './RelationMapper';
 
 describe('RelationMapper', () => {
-  let connection: Connection;
   let mockData: TestMockData;
   let executableSchema: GraphQLSchema;
 
   beforeAll(async () => {
-    // create database connection
-    connection = await createConnection({
-      type: 'sqlite',
-      database: 'test/test.sqlite',
-      entities: [Country, Product, Owner, Store, Image, ImageFile, Video],
-      synchronize: true,
-      dropSchema: true,
-    });
-    mockData = await insertMockData(connection);
+    // set up database
+    await dataSource.initialize();
+    mockData = await insertMockData(dataSource);
 
     // create GraphQL schema
     executableSchema = makeExecutableSchema({
@@ -62,7 +49,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
         expect([...relations]).toEqual(['owner', 'store']);
       };
@@ -129,7 +116,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
         expect([...relations]).toEqual([
           'owner',
@@ -209,7 +196,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Store, info, 'store');
+        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Store, info, 'store');
 
         expect([...relations]).toEqual(['owner', 'owner.address.country']);
       };
@@ -288,7 +275,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
         expect([...relations]).toEqual(['owner', 'owner.address.country', 'store', 'store.owner']);
       };
@@ -365,7 +352,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(connection).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
         expect([...relations]).toEqual([]);
       };
@@ -430,7 +417,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const mapper = new RelationMapper(connection);
+        const mapper = new RelationMapper(dataSource);
 
         expect(mapper.findQueryNode('invalidField', info)).toBeNull();
         expect(mapper.findQueryNode('name', info)).toMatchObject<FieldNode>({
@@ -487,7 +474,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const mapper = new RelationMapper(connection);
+        const mapper = new RelationMapper(dataSource);
 
         expect(mapper.findQueryNode('name', info)).toMatchObject<FieldNode>({
           kind: 'Field',
@@ -538,7 +525,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const mapper = new RelationMapper(connection);
+        const mapper = new RelationMapper(dataSource);
 
         expect(mapper.isFieldSelected('name', info)).toBe(true);
         expect(mapper.isFieldSelected('invalidField', info)).toBe(false);
@@ -574,7 +561,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const mapper = new RelationMapper(connection);
+        const mapper = new RelationMapper(dataSource);
 
         expect(mapper.isFieldSelected('name', info)).toBe(true);
         expect(mapper.isFieldSelected('images.sizes', info)).toBe(true);
@@ -632,7 +619,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const mapper = new RelationMapper(connection);
+        const mapper = new RelationMapper(dataSource);
 
         expect(mapper.isFieldSelected('media', info)).toBe(true);
         expect(mapper.isFieldSelected('media.sizes', info)).toBe(true);
