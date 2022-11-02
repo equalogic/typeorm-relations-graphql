@@ -1,10 +1,10 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
-import { Connection, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
+import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 export class RelationMapper {
-  public constructor(private readonly connection: Connection) {}
+  public constructor(private readonly dataSource: DataSource) {}
 
   /*
    * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
@@ -156,7 +156,7 @@ export class RelationMapper {
   }
 
   private getEntityMetadata(entity: ObjectType<any> | EntitySchema<any> | string): EntityMetadata {
-    return this.connection.getMetadata(entity);
+    return this.dataSource.getMetadata(entity);
   }
 
   private getNameFromNode(selectionNode: SelectionNode): string | null {
