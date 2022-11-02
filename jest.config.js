@@ -10,9 +10,12 @@ module.exports = {
   coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/test/'],
   coverageDirectory: '<rootDir>/test/.coverage',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
+  transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        isolatedModules: true,
+      },
+    ],
   },
 };
