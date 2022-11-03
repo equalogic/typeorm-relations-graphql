@@ -76,7 +76,7 @@ export class RelationMapper {
             currentTargetEntity = propMetadata.inverseEntityMetadata.target;
             nextLevel = currentLevel + 1;
             currentPropertyPath.push(propMetadata.propertyName);
-            relationMap.addByPath(currentPropertyPath);
+            relationMap.add(currentPropertyPath);
           } else if (propMetadata instanceof EmbeddedMetadata) {
             currentPropertyPath.push(propMetadata.propertyPath);
           }

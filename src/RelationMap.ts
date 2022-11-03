@@ -16,22 +16,18 @@ export class RelationMap<Entity extends InstanceType<any> = any> {
     return this.value;
   }
 
-  public add(source: RelationMap<Entity> | FindOptionsRelations<Entity> | keyof Entity): this {
-    this.value = mergeRelations(
-      this.value,
-      source instanceof RelationMap
-        ? source.valueOf()
-        : isKeyOf<Entity>(source)
-        ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          ({ [source]: true } as FindOptionsRelations<Entity>)
-        : source,
-    );
-
-    return this;
-  }
-
-  public addByPath(path: string[]): this {
-    this.value = addRelationByPath(this.value, path);
+  public add(source: RelationMap<Entity> | FindOptionsRelations<Entity> | keyof Entity | string[]): this {
+    this.value = Array.isArray(source)
+      ? addRelationByPath(this.value, source)
+      : mergeRelations(
+          this.value,
+          source instanceof RelationMap
+            ? source.valueOf()
+            : isKeyOf<Entity>(source)
+            ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              ({ [source]: true } as FindOptionsRelations<Entity>)
+            : source,
+        );
 
     return this;
   }
