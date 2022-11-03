@@ -140,19 +140,19 @@ function products(source: any, args: any, context: any, info: GraphQLResolveInfo
 In this example if your `Product` entity has an `owner` property that relates to another entity, and the `owner` field
 is selected by the client's GraphQL query, then calling `toFindOptionsRelations()` will produce:
 
-```ts
+```
 {
-  owner: true;
+  owner: true
 }
 ```
 
 Or, if `owner` contains an additional relationship to an `address` entity which is also selected by the client, you can
 get a nested structure like:
 
-```ts
+```
 {
   owner: {
-    address: true;
+    address: true
   }
 }
 ```
@@ -272,8 +272,6 @@ const relationMap = new RelationMap<Product>({ owner: { address: true } });
 relationMap.add(relationMapper.buildForQuery(Product, info));
 ```
 
-#### `addByPath(path: string[])`
-
 #### `toFindOptionsRelations()`
 
 Returns a plain object representation of the relations, suitable for use with any of TypeORM's repository methods that
@@ -294,3 +292,7 @@ If you are using a `SelectQueryBuilder`, you can join the relations like this:
 ```ts
 queryBuilder.setFindOptions({ relations: relationMap.toFindOptionsRelations() });
 ```
+
+## License
+
+MIT
