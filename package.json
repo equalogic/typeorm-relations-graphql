@@ -31,11 +31,15 @@
     "graphql": ">=14.6.0",
     "typeorm": "^0.3.0"
   },
+  "dependencies": {
+    "lodash.mergewith": "4.6.2"
+  },
   "devDependencies": {
     "@graphql-tools/mock": "8.7.8",
     "@graphql-tools/schema": "9.0.6",
     "@graphql-tools/utils": "8.13.1",
     "@types/jest": "29.2.0",
+    "@types/lodash.mergewith": "4.6.7",
     "@types/node": "18.11.8",
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",
