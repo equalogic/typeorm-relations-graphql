@@ -62,3 +62,7 @@ export function mergeRelations<Entity>(
 
   return result;
 }
+
+export function isKeyOf<Target>(key: unknown, target?: Target): key is keyof Target {
+  return typeof key === 'string' && (target == null || key in target);
+}
