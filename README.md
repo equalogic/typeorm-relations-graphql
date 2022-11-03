@@ -142,7 +142,7 @@ is selected by the client's GraphQL query, then calling `toFindOptionsRelations(
 
 ```ts
 {
-  owner: true
+  owner: true;
 }
 ```
 
@@ -152,7 +152,7 @@ get a nested structure like:
 ```ts
 {
   owner: {
-    address: true
+    address: true;
   }
 }
 ```
@@ -259,7 +259,7 @@ use `add` to manually incorporate them into the map.
 const relationMap = relationMapper.buildForQuery(Product, info);
 
 // Always fetch the Product.owner.address relation
-relationMap.add({ owner: { address: true }});
+relationMap.add({ owner: { address: true } });
 
 // Top-level relations (only those that exist on Product directly) can be added by key name
 relationMap.add('owner');
@@ -268,13 +268,11 @@ relationMap.add('owner');
 You can also merge two `RelationMap` instances together:
 
 ```ts
-const relationMap = new RelationMap<Product>({ owner: { address: true }});
+const relationMap = new RelationMap<Product>({ owner: { address: true } });
 relationMap.add(relationMapper.buildForQuery(Product, info));
 ```
 
 #### `addByPath(path: string[])`
-
-
 
 #### `toFindOptionsRelations()`
 
