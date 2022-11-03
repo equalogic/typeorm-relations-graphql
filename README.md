@@ -1,6 +1,41 @@
-# TypeORM-GraphQL-Joiner
+<div align="center">
+  <img src="https://github.com/equalogic/typeorm-graphql-joiner/raw/master/resources/logo@720w.png" width="720" height="420">
+  <br>
+  <br>
+  <a href="https://npmjs.com/package/typeorm-graphql-joiner">
+    <img src="https://img.shields.io/npm/v/typeorm-graphql-joiner">
+  </a>
+  <a href="https://npmjs.com/package/typeorm-graphql-joiner">
+    <img src="https://img.shields.io/npm/dy/typeorm-graphql-joiner">
+  </a>
+  <br>
+  <br>
+</div>
 
-Builds a list of TypeORM entity relations to be joined based on object fields selected in a GraphQL query.
+Automatically determine the entity relationships that must be `JOIN`ed in a TypeORM query to satisfy nested object
+fields selected by a client in a GraphQL query.
+
+Can be used as a potentially higher performance alternative to the [DataLoader pattern](https://github.com/graphql/dataloader).
+
+## Installation
+
+```
+npm i typeorm-graphql-joiner
+```
+
+This library is written in TypeScript, so type definitions are included in the box.
+
+Your project must also install the following as peer dependencies (you should have them already):
+
+- [typeorm](https://typeorm.io/) v0.3.x
+- [graphql](https://www.npmjs.com/package/graphql) v14.x or higher
+
+Note: typeorm v0.3.0 [changed](https://typeorm.io/changelog#030httpsgithubcomtypeormtypeormpull8616-2022-03-17) the way
+relations and data sources work. If you are still using typeorm v0.2.x, please install
+[typeorm-graphql-joiner@^1](https://github.com/equalogic/typeorm-graphql-joiner/blob/1.x/README.md) and read the usage
+instructions for that version.
+
+## Introduction
 
 When your GraphQL server is backed by TypeORM entities, you may have object relationships like the following example:
 
@@ -28,7 +63,7 @@ resolve `product.owner` using a database query to fetch the related `Owner` obje
 that returns a list of _n_ products then your server will need to perform _n_ + 1 database queries to fully resolve it.
 This problem multiplies exponentially as your schema grows more complex and you have levels of nested relationships.
 
-TypeORM-GraphQL-Joiner can help here by optimizing these relationships into SQL `JOIN`s. Instead of fetching the
+_TypeORM<->GraphQL Joiner_ can help here by optimizing these relationships into SQL `JOIN`s. Instead of fetching the
 `product` and then each `owner` individually, it enables you to fetch the `product` with all requested relationships
 in a single database query by making use of TypeORM's `relations` [option](https://typeorm.io/#/find-options) on `find`
 methods.
@@ -52,70 +87,86 @@ The value of this optimization increases as you have greater levels of nesting, 
 
 You could join these relations manually (or eagerly) with TypeORM, but then you are likely to end up overfetching -
 retrieving relations that were not requested by the client and producing SQL that is more expensive than necessary.
-TypeORM-GraphQL-Joiner only joins relations that were requested in the client's GQL query.
+_TypeORM<->GraphQL Joiner_ only joins relations that were requested in the client's GQL query.
 
-## Installation
-
-```
-npm i typeorm-graphql-joiner
-```
-
-This library is written in TypeScript, so type definitions are included in the box.
-
-Your project must also install the following as peer dependencies (you should have them already):
-
-- [typeorm](https://typeorm.io/)
-- [graphql](https://www.npmjs.com/package/graphql)
+You could also use a [DataLoader](https://github.com/slaypni/type-graphql-dataloader) to batch requests, but this will
+usually still result in more database queries than are produced by joining relations. Beware however that large joins
+with many levels of nesting can be bad for performance, too, so you may need to mix approaches.
 
 ## Usage
 
-First, create a `RelationMapper` instance, passing in a TypeORM `Connection` object (which provides access to entity
+First, create a `RelationMapper` instance, passing in a TypeORM `DataSource` object (which provides access to entity
 metadata):
 
 ```ts
-import { getConnection } from 'typeorm';
 import { RelationMapper } from 'typeorm-graphql-joiner';
+import { dataSource } from './datasource';
 
-const relationMapper = new RelationMapper(getConnection());
+const relationMapper = new RelationMapper(dataSource);
 ```
 
-Inside a GraphQL query resolver (where you have a `GraphQLResolveInfo` object available) you can do the following:
+Inside a GraphQL query resolver (where you have a `GraphQLResolveInfo` object available) you can use `RelationMapper`
+to determine the relations you need to join to fulfill the query.
 
-#### `buildRelationListForQuery(entity: Entity, info: GraphQLResolveInfo): Set<string>`
+---
 
-Builds a list of relations for an entity matching the root of the GraphQL query. For example, if you have a `products`
-query in your GQL schema which returns a list of `Product` entities (where the `Product` entity and `Product` GQL object
-type are equivalent), you can simply map `Product` relations in this way:
+### RelationMapper
+
+#### `buildForQuery(entity: Constructor<Entity>, info: GraphQLResolveInfo): RelationMap<Entity>`
+
+Builds a `RelationMap` for an entity class by mapping from the root of the GraphQL query.
+
+The `entity` passed in should be an entity class constructor (not an instance of the entity).
+
+For example, if you have a `products` query in your GQL schema which returns a list of `Product` entities (where the
+`Product` entity and `Product` GQL object type are equivalent), you can simply map `Product` relations in this way:
 
 ```ts
 import { GraphQLResolveInfo } from 'graphql';
+import { dataSource } from './datasource';
 
 // Example resolver function for a "products" query in your GQL schema
 function products(source: any, args: any, context: any, info: GraphQLResolveInfo): Promise<Product[]> {
-  const connection = getConnection();
-  const relationMapper = new RelationMapper(connection);
+  const relationMapper = new RelationMapper(dataSource);
 
-  const productRelations: Set<string> = relationMapper.buildRelationListForQuery(Product, info);
+  const productRelationMap = relationMapper.buildForQuery(Product, info);
 
-  return connection.getRepository(Product).find({
-    relations: [...productRelations],
+  return dataSource.getRepository(Product).find({
+    relations: productRelationMap.toFindOptionsRelations(),
   });
 }
 ```
 
-This method returns a [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), so
-you need to spread it to create a plain array for TypeORM. A `Set` is used so that it is easy to manipulate the list by
-adding or removing relations without worrying about creating duplicate entries.
+In this example if your `Product` entity has an `owner` property that relates to another entity, and the `owner` field
+is selected by the client's GraphQL query, then calling `toFindOptionsRelations()` will produce:
 
-#### `buildRelationListForQuery(entity: Entity, info: GraphQLResolveInfo, path: string): Set<string>`
+```ts
+{
+  owner: true
+}
+```
+
+Or, if `owner` contains an additional relationship to an `address` entity which is also selected by the client, you can
+get a nested structure like:
+
+```ts
+{
+  owner: {
+    address: true
+  }
+}
+```
+
+#### `buildForQuery(entity: Constructor<Entity>, info: GraphQLResolveInfo, path: string): RelationMap<Entity>`
 
 In some cases you may need to map relations to entity fields where the GQL object type for the entity is not the root
 node in the query. A common example of this is in a mutation which returns a payload object containing the modified
 object rather than the object directly. In this case you can pass a `path` string as the last argument to
-`buildRelationListForQuery`:
+`buildForQuery`:
 
 ```ts
 import { GraphQLResolveInfo } from 'graphql';
+import { dataSource } from './datasource';
 
 // Example resolver function for a "createProduct" mutation in your GQL schema
 async function createProduct(
@@ -124,12 +175,11 @@ async function createProduct(
   context: any,
   info: GraphQLResolveInfo,
 ): Promise<CreateProductPayload> {
-  const connection = getConnection();
-  const relationMapper = new RelationMapper(connection);
+  const relationMapper = new RelationMapper(dataSource);
 
   // Create the new product
-  const product: Product = await connection.getRepository(Product).save(
-    connection.getRepository(Product).create({
+  const product: Product = await dataSource.getRepository(Product).save(
+    dataSource.getRepository(Product).create({
       name: 'New Product',
     }),
   );
@@ -137,8 +187,9 @@ async function createProduct(
   // Create payload and re-fetch the new product to retrieve all requested relations
   const payload: CreateProductPayload = {
     success: true,
-    product: await connection.getRepository(Product).findOneOrFail(product.id, {
-      relations: [...relationMapper.buildRelationListForQuery(Product, info, 'product')],
+    product: await dataSource.getRepository(Product).findOneOrFail({
+      where: { id: product.id },
+      relations: relationMapper.buildForQuery(Product, info, 'product').toFindOptionsRelations(),
     }),
   };
 
@@ -165,14 +216,14 @@ mutation {
 ```
 
 The `Product` entity here exists below the root level of the object being resolved (`createProduct`), at a field called
-`product`. So the path `'product'` must be given to `buildRelationListForQuery`.
+`product`. So the path `'product'` must be given to `buildForQuery`.
 
 Dotted path notation can be used when the entity is at an even lower level in the node tree. For example, the path
 `'product.owner'` could be used to map the `Owner` entity in this example.
 
-#### `buildRelationList(entity: Entity, baseNode: SelectionNode, fragments?: Record<string, FragmentDefinitionNode>): Set<string>`
+#### `build(entity: Constructor<Entity>, baseNode: SelectionNode, fragments?: Record<string, FragmentDefinitionNode>): RelationMapper<Entity>`
 
-This method works like `buildRelationListForQuery` (and is called by it internally), but it can operate on an arbitrary
+This method works like `buildForQuery` (and is called by it internally), but it can operate on an arbitrary
 `SelectionNode` rather than requiring an entire `GraphQLResolveInfo` object.
 
 If your GQL for the selection may contain named fragments, the definition of those fragments must be passed through.
@@ -189,3 +240,59 @@ Nested fields can be located using dotted `'parentField.childField.grandchildFie
 
 Like `findQueryNode` but just returns a boolean indicating whether the referenced field is selected in the GQL query
 represented by `info`.
+
+---
+
+### RelationMap
+
+This is the object returned by the `build` and `buildForQuery` methods of `RelationMapper`. You can also call the
+constructor to create your own `RelationMap` instance and initialize it with a `FindOptionsRelations` object.
+
+`RelationMap` contains methods that you can use to manipulate the relations before passing them to TypeORM.
+
+#### `add(source: FindOptionsRelations | RelationMap | string)`
+
+If there are specific relations that you want to fetch regardless of whether they were selected by the client, you can
+use `add` to manually incorporate them into the map.
+
+```ts
+const relationMap = relationMapper.buildForQuery(Product, info);
+
+// Always fetch the Product.owner.address relation
+relationMap.add({ owner: { address: true }});
+
+// Top-level relations (only those that exist on Product directly) can be added by key name
+relationMap.add('owner');
+```
+
+You can also merge two `RelationMap` instances together:
+
+```ts
+const relationMap = new RelationMap<Product>({ owner: { address: true }});
+relationMap.add(relationMapper.buildForQuery(Product, info));
+```
+
+#### `addByPath(path: string[])`
+
+
+
+#### `toFindOptionsRelations()`
+
+Returns a plain object representation of the relations, suitable for use with any of TypeORM's repository methods that
+accept [`find` options](https://typeorm.io/find-options).
+
+Example:
+
+```ts
+const products = await dataSource.getRepository(Product).find({
+  relations: relationMap.toFindOptionsRelations(),
+  where: { ... },
+  order: { ... }
+})
+```
+
+If you are using a `SelectQueryBuilder`, you can join the relations like this:
+
+```ts
+queryBuilder.setFindOptions({ relations: relationMap.toFindOptionsRelations() });
+```
