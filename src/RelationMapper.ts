@@ -1,21 +1,21 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
-import { DataSource, EntityMetadata, EntitySchema, FindOptionsRelations, ObjectType } from 'typeorm';
+import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
-import { addRelationByPath, mergeRelations } from './util';
+import { RelationMap } from './RelationMap';
 
 export class RelationMapper {
   public constructor(private readonly dataSource: DataSource) {}
 
   /*
-   * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
+   * Build a map of matching TypeORM relation properties for an entity, based on the `info` given to a GraphQL
    * query resolver.
    */
-  public buildRelationsForQuery<Entity extends InstanceType<any>>(
+  public buildForQuery<Entity extends InstanceType<any>>(
     entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     info: GraphQLResolveInfo,
     path?: string,
-  ): FindOptionsRelations<Entity> {
+  ): RelationMap<Entity> {
     const rootNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
 
     if (rootNode == null) {
@@ -28,24 +28,24 @@ export class RelationMapper {
       throw new Error(`Could not locate field named "${path}" in query info"`);
     }
 
-    return this.buildRelations(entity, baseNode, info.fragments);
+    return this.build(entity, baseNode, info.fragments);
   }
 
   /*
-   * Build the list of matching TypeORM relation property names for an entity, starting at a base SelectionNode.
+   * Build a map of matching TypeORM relation properties for an entity, starting at a base SelectionNode.
    */
-  public buildRelations<Entity extends InstanceType<any>>(
+  public build<Entity extends InstanceType<any>>(
     entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     baseNode: SelectionNode,
     fragments?: Record<string, FragmentDefinitionNode>,
     basePropertyPath?: string,
     currentLevel: number = 0,
-  ): FindOptionsRelations<Entity> {
-    let relations: FindOptionsRelations<Entity> = {};
+  ): RelationMap<Entity> {
+    const relationMap = new RelationMap<Entity>();
     const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
 
     if (selectionSet == null) {
-      return relations;
+      return relationMap;
     }
 
     // look for any relation properties among the selected fields inside the base node
@@ -76,7 +76,7 @@ export class RelationMapper {
             currentTargetEntity = propMetadata.inverseEntityMetadata.target;
             nextLevel = currentLevel + 1;
             currentPropertyPath.push(propMetadata.propertyName);
-            relations = addRelationByPath(relations, currentPropertyPath);
+            relationMap.addByPath(currentPropertyPath);
           } else if (propMetadata instanceof EmbeddedMetadata) {
             currentPropertyPath.push(propMetadata.propertyPath);
           }
@@ -89,17 +89,17 @@ export class RelationMapper {
        */
 
       // recursively map nested relations
-      const nestedRelations = this.buildRelations(
+      const nestedRelations = this.build(
         currentTargetEntity,
         selectionNode,
         fragments,
         currentPropertyPath.join('.'),
         nextLevel,
       );
-      relations = mergeRelations(relations, nestedRelations);
+      relationMap.add(nestedRelations);
     });
 
-    return relations;
+    return relationMap;
   }
 
   /*

@@ -49,9 +49,9 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
+        const relationMap = new RelationMapper(dataSource).buildForQuery(Product, info);
 
-        expect(relations).toEqual({
+        expect(relationMap.toFindOptionsRelations()).toEqual({
           owner: true,
           store: true,
         });
@@ -119,9 +119,9 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
+        const relationMap = new RelationMapper(dataSource).buildForQuery(Product, info);
 
-        expect(relations).toEqual({
+        expect(relationMap.toFindOptionsRelations()).toEqual({
           owner: {
             address: {
               country: true,
@@ -206,9 +206,9 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Store, info, 'store');
+        const relationMap = new RelationMapper(dataSource).buildForQuery(Store, info, 'store');
 
-        expect(relations).toEqual({
+        expect(relationMap.toFindOptionsRelations()).toEqual({
           owner: {
             address: {
               country: true,
@@ -291,9 +291,9 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
+        const relationMap = new RelationMapper(dataSource).buildForQuery(Product, info);
 
-        expect(relations).toEqual({
+        expect(relationMap.toFindOptionsRelations()).toEqual({
           owner: {
             address: {
               country: true,
@@ -377,9 +377,9 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
+        const relationMap = new RelationMapper(dataSource).buildForQuery(Product, info);
 
-        expect(relations).toEqual({});
+        expect(relationMap.toFindOptionsRelations()).toEqual({});
       };
       const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
 

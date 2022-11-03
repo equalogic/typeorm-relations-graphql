@@ -1,7 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
 import { RelationMapper } from '../src';
-import { addRelationByPath } from '../src/util';
 import { dataSource } from './data';
 import { Image, ImageSizeMap } from './entities/image';
 import { Product } from './entities/product';
@@ -89,10 +88,10 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
     ): Promise<Product[]> {
       context.resolveInfoHook(info);
 
-      const productRelations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
+      const productMap = new RelationMapper(dataSource).buildForQuery(Product, info);
 
       return dataSource.getRepository(Product).find({
-        relations: productRelations,
+        relations: productMap.toFindOptionsRelations(),
       });
     },
   },
@@ -112,34 +111,34 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       context: TestResolverContext,
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {
-      const mapper = new RelationMapper(dataSource);
-      let imageRelations = mapper.buildRelationsForQuery(Image, info);
-      const videoRelations = mapper.buildRelationsForQuery(Video, info);
+      const relationMapper = new RelationMapper(dataSource);
+      const imageRelationMap = relationMapper.buildForQuery(Image, info);
+      const videoRelationMap = relationMapper.buildForQuery(Video, info);
 
       // TODO: these kind of relations can't be mapped automatically yet
-      if (mapper.isFieldSelected('sizes.small', info)) {
-        imageRelations = addRelationByPath(imageRelations, ['sizeSmall']);
+      if (relationMapper.isFieldSelected('sizes.small', info)) {
+        imageRelationMap.add('sizeSmall');
       }
 
-      if (mapper.isFieldSelected('sizes.medium', info)) {
-        imageRelations = addRelationByPath(imageRelations, ['sizeMedium']);
+      if (relationMapper.isFieldSelected('sizes.medium', info)) {
+        imageRelationMap.add('sizeMedium');
       }
 
-      if (mapper.isFieldSelected('sizes.large', info)) {
-        imageRelations = addRelationByPath(imageRelations, ['sizeLarge']);
+      if (relationMapper.isFieldSelected('sizes.large', info)) {
+        imageRelationMap.add('sizeLarge');
       }
 
       const images = await dataSource.getRepository(Image).find({
         where: {
           product: source,
         },
-        relations: imageRelations,
+        relations: imageRelationMap.valueOf(),
       });
       const videos = await dataSource.getRepository(Video).find({
         where: {
           product: source,
         },
-        relations: videoRelations,
+        relations: videoRelationMap.toFindOptionsRelations(),
       });
 
       return [...images, ...videos];
