@@ -1,6 +1,7 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
 import { RelationMapper } from '../src';
+import { addRelationByPath } from '../src/util';
 import { dataSource } from './data';
 import { Image, ImageSizeMap } from './entities/image';
 import { Product } from './entities/product';
@@ -91,7 +92,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       const productRelations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
 
       return dataSource.getRepository(Product).find({
-        relations: [...productRelations],
+        relations: productRelations,
       });
     },
   },
@@ -112,33 +113,33 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {
       const mapper = new RelationMapper(dataSource);
-      const imageRelations = mapper.buildRelationListForQuery(Image, info);
+      let imageRelations = mapper.buildRelationListForQuery(Image, info);
       const videoRelations = mapper.buildRelationListForQuery(Video, info);
 
       // TODO: these kind of relations can't be mapped automatically yet
       if (mapper.isFieldSelected('sizes.small', info)) {
-        imageRelations.add('sizeSmall');
+        imageRelations = addRelationByPath(imageRelations, ['sizeSmall']);
       }
 
       if (mapper.isFieldSelected('sizes.medium', info)) {
-        imageRelations.add('sizeMedium');
+        imageRelations = addRelationByPath(imageRelations, ['sizeMedium']);
       }
 
       if (mapper.isFieldSelected('sizes.large', info)) {
-        imageRelations.add('sizeLarge');
+        imageRelations = addRelationByPath(imageRelations, ['sizeLarge']);
       }
 
       const images = await dataSource.getRepository(Image).find({
         where: {
           product: source,
         },
-        relations: [...imageRelations],
+        relations: imageRelations,
       });
       const videos = await dataSource.getRepository(Video).find({
         where: {
           product: source,
         },
-        relations: [...videoRelations],
+        relations: videoRelations,
       });
 
       return [...images, ...videos];

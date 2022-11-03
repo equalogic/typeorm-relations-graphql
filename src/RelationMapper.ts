@@ -1,7 +1,8 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
-import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
+import { DataSource, EntityMetadata, EntitySchema, FindOptionsRelations, ObjectType } from 'typeorm';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
+import { addRelationByPath, mergeRelations } from './util';
 
 export class RelationMapper {
   public constructor(private readonly dataSource: DataSource) {}
@@ -10,11 +11,11 @@ export class RelationMapper {
    * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
    * query resolver.
    */
-  public buildRelationListForQuery(
-    entity: ObjectType<any> | EntitySchema<any> | string,
+  public buildRelationListForQuery<Entity extends InstanceType<any>>(
+    entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     info: GraphQLResolveInfo,
     path?: string,
-  ): Set<string> {
+  ): FindOptionsRelations<Entity> {
     const rootNode = info.fieldNodes.find(fieldNode => fieldNode.name.value === info.fieldName);
 
     if (rootNode == null) {
@@ -33,23 +34,24 @@ export class RelationMapper {
   /*
    * Build the list of matching TypeORM relation property names for an entity, starting at a base SelectionNode.
    */
-  public buildRelationList(
-    entity: ObjectType<any> | EntitySchema<any> | string,
+  public buildRelationList<Entity extends InstanceType<any>>(
+    entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     baseNode: SelectionNode,
     fragments?: Record<string, FragmentDefinitionNode>,
     basePropertyPath?: string,
     currentLevel: number = 0,
-  ): Set<string> {
-    const relationNames = new Set<string>();
+  ): FindOptionsRelations<Entity> {
+    let relations: FindOptionsRelations<Entity> = {};
     const selectionSet = this.getSelectionSetFromNode(baseNode, fragments);
 
     if (selectionSet == null) {
-      return relationNames;
+      return relations;
     }
 
     // look for any relation properties among the selected fields inside the base node
     selectionSet.selections.forEach((selectionNode: SelectionNode) => {
       const currentPropertyPath: string[] = (basePropertyPath ?? '').split('.').filter(path => path !== '');
+      // eslint-disable-next-line @typescript-eslint/ban-types
       let currentTargetEntity = entity;
       let nextLevel: number = currentLevel;
 
@@ -74,7 +76,7 @@ export class RelationMapper {
             currentTargetEntity = propMetadata.inverseEntityMetadata.target;
             nextLevel = currentLevel + 1;
             currentPropertyPath.push(propMetadata.propertyName);
-            relationNames.add(currentPropertyPath.join('.'));
+            relations = addRelationByPath(relations, currentPropertyPath);
           } else if (propMetadata instanceof EmbeddedMetadata) {
             currentPropertyPath.push(propMetadata.propertyPath);
           }
@@ -94,10 +96,10 @@ export class RelationMapper {
         currentPropertyPath.join('.'),
         nextLevel,
       );
-      nestedRelations.forEach(nestedRelation => relationNames.add(nestedRelation));
+      relations = mergeRelations(relations, nestedRelations);
     });
 
-    return relationNames;
+    return relations;
   }
 
   /*
