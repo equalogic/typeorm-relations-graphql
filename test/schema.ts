@@ -89,7 +89,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
     ): Promise<Product[]> {
       context.resolveInfoHook(info);
 
-      const productRelations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
+      const productRelations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
 
       return dataSource.getRepository(Product).find({
         relations: productRelations,
@@ -113,8 +113,8 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {
       const mapper = new RelationMapper(dataSource);
-      let imageRelations = mapper.buildRelationListForQuery(Image, info);
-      const videoRelations = mapper.buildRelationListForQuery(Video, info);
+      let imageRelations = mapper.buildRelationsForQuery(Image, info);
+      const videoRelations = mapper.buildRelationsForQuery(Video, info);
 
       // TODO: these kind of relations can't be mapped automatically yet
       if (mapper.isFieldSelected('sizes.small', info)) {

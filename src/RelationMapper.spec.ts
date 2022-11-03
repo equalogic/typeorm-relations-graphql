@@ -28,7 +28,7 @@ describe('RelationMapper', () => {
     });
   });
 
-  describe('buildRelationListForQuery()', () => {
+  describe('buildRelationsForQuery()', () => {
     it('maps single-level GQL selections to ORM relations', async () => {
       // language=GraphQL
       const query = `
@@ -49,7 +49,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
 
         expect(relations).toEqual({
           owner: true,
@@ -119,7 +119,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
 
         expect(relations).toEqual({
           owner: {
@@ -206,7 +206,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Store, info, 'store');
+        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Store, info, 'store');
 
         expect(relations).toEqual({
           owner: {
@@ -291,7 +291,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
 
         expect(relations).toEqual({
           owner: {
@@ -377,7 +377,7 @@ describe('RelationMapper', () => {
       `;
 
       const resolveInfoHook = (info: GraphQLResolveInfo): void => {
-        const relations = new RelationMapper(dataSource).buildRelationListForQuery(Product, info);
+        const relations = new RelationMapper(dataSource).buildRelationsForQuery(Product, info);
 
         expect(relations).toEqual({});
       };

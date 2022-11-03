@@ -11,7 +11,7 @@ export class RelationMapper {
    * Build the list of matching TypeORM relation property names for an entity, based on the `info` given to a GraphQL
    * query resolver.
    */
-  public buildRelationListForQuery<Entity extends InstanceType<any>>(
+  public buildRelationsForQuery<Entity extends InstanceType<any>>(
     entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     info: GraphQLResolveInfo,
     path?: string,
@@ -28,13 +28,13 @@ export class RelationMapper {
       throw new Error(`Could not locate field named "${path}" in query info"`);
     }
 
-    return this.buildRelationList(entity, baseNode, info.fragments);
+    return this.buildRelations(entity, baseNode, info.fragments);
   }
 
   /*
    * Build the list of matching TypeORM relation property names for an entity, starting at a base SelectionNode.
    */
-  public buildRelationList<Entity extends InstanceType<any>>(
+  public buildRelations<Entity extends InstanceType<any>>(
     entity: ObjectType<Entity> | EntitySchema<Entity> | string,
     baseNode: SelectionNode,
     fragments?: Record<string, FragmentDefinitionNode>,
@@ -89,7 +89,7 @@ export class RelationMapper {
        */
 
       // recursively map nested relations
-      const nestedRelations = this.buildRelationList(
+      const nestedRelations = this.buildRelations(
         currentTargetEntity,
         selectionNode,
         fragments,
