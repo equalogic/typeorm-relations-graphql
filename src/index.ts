@@ -3,3 +3,4 @@
  */
 
 export * from './RelationMapper';
+export * from './util';
