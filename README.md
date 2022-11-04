@@ -238,18 +238,6 @@ This method works like `buildForQuery` (and is called by it internally), but it 
 If your GQL for the selection may contain named fragments, the definition of those fragments must be passed through.
 The required data can be retrieved from the `fragments` property on the top level `GraphQLResolveInfo` object.
 
-#### `findQueryNode(fieldPath: string, info: GraphQLResolveInfo): SelectionNode | null`
-
-Returns the `SelectionNode` for the referenced field if it was selected in the GQL query represented by `info`. Returns
-`null` if the field is not selected by the query.
-
-Nested fields can be located using dotted `'parentField.childField.grandchildField'` notation.
-
-#### `isFieldSelected(fieldPath: string, info: GraphQLResolveInfo): boolean`
-
-Like `findQueryNode` but just returns a boolean indicating whether the referenced field is selected in the GQL query
-represented by `info`.
-
 ---
 
 ## License
