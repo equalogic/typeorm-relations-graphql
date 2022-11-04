@@ -32,7 +32,8 @@
     "typeorm": "^0.3.0"
   },
   "dependencies": {
-    "lodash.mergewith": "4.6.2"
+    "lodash.mergewith": "4.6.2",
+    "typeorm-relations": "1.0.0"
   },
   "devDependencies": {
     "@graphql-tools/mock": "8.7.8",
