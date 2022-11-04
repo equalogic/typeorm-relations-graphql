@@ -1,8 +1,8 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode, SelectionSetNode } from 'graphql';
 import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
+import { RelationMap } from 'typeorm-relations';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
-import { RelationMap } from './RelationMap';
 
 export class RelationMapper {
   public constructor(private readonly dataSource: DataSource) {}
