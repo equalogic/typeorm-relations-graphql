@@ -1,7 +1,7 @@
 {
   "extends": [
     "config:js-lib",
-    ":automergeMajor",
+    ":automergeMinor",
     ":automergePr",
     ":automergeRequireAllStatusChecks",
     ":dependencyDashboard",
@@ -13,7 +13,7 @@
   "stabilityDays": 3,
   "rebaseWhen": "conflicted",
   "labels": ["dependencies"],
-  "reviewers": ["sgarner"],
+  "reviewers": [],
   "packageRules": [
     {
       "packagePatterns": ["eslint"],
