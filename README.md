@@ -67,7 +67,7 @@ resolve `product.owner` using a database query to fetch the related `Owner` obje
 that returns a list of _n_ products then your server will need to perform _n_ + 1 database queries to fully resolve it.
 This problem multiplies exponentially as your schema grows more complex and you have levels of nested relationships.
 
-_TypeORM<->GraphQL Joiner_ can help here by optimizing these relationships into SQL `JOIN`s. Instead of fetching the
+**typeorm-relations-graphql** can help here by optimizing these relationships into SQL `JOIN`s. Instead of fetching the
 `product` and then each `owner` individually, it enables you to fetch the `product` with all requested relationships
 in a single database query by making use of TypeORM's `relations` [option](https://typeorm.io/#/find-options) on `find`
 methods.
@@ -91,7 +91,7 @@ The value of this optimization increases as you have greater levels of nesting, 
 
 You could join these relations manually (or eagerly) with TypeORM, but then you are likely to end up overfetching -
 retrieving relations that were not requested by the client and producing SQL that is more expensive than necessary.
-_TypeORM<->GraphQL Joiner_ only joins relations that were requested in the client's GQL query.
+**typeorm-relations-graphql** only joins relations that were requested in the client's GQL query.
 
 You could also use a [DataLoader](https://github.com/slaypni/type-graphql-dataloader) to batch requests, but this will
 usually still result in more database queries than are produced by joining relations. Beware however that large joins
