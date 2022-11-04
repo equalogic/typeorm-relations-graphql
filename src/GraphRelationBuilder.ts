@@ -5,7 +5,7 @@ import { RelationMap } from 'typeorm-relations';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
-export class RelationMapper {
+export class GraphRelationBuilder {
   public constructor(private readonly dataSource: DataSource) {}
 
   /*

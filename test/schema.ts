@@ -1,7 +1,7 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
 import { isFieldSelected } from 'graphql-info-inspector';
-import { RelationMapper } from '../src';
+import { GraphRelationBuilder } from '../src';
 import { dataSource } from './data';
 import { Image, ImageSizeMap } from './entities/image';
 import { Product } from './entities/product';
@@ -89,7 +89,7 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
     ): Promise<Product[]> {
       context.resolveInfoHook(info);
 
-      const productMap = new RelationMapper(dataSource).buildForQuery(Product, info);
+      const productMap = new GraphRelationBuilder(dataSource).buildForQuery(Product, info);
 
       return dataSource.getRepository(Product).find({
         relations: productMap.toFindOptionsRelations(),
@@ -112,9 +112,9 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       context: TestResolverContext,
       info: GraphQLResolveInfo,
     ): Promise<(Image | Video)[]> {
-      const relationMapper = new RelationMapper(dataSource);
-      const imageRelationMap = relationMapper.buildForQuery(Image, info);
-      const videoRelationMap = relationMapper.buildForQuery(Video, info);
+      const graphRelationBuilder = new GraphRelationBuilder(dataSource);
+      const imageRelationMap = graphRelationBuilder.buildForQuery(Image, info);
+      const videoRelationMap = graphRelationBuilder.buildForQuery(Video, info);
 
       // TODO: these kind of relations can't be mapped automatically yet
       if (isFieldSelected('sizes.small', info)) {

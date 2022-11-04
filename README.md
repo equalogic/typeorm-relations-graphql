@@ -101,25 +101,25 @@ with many levels of nesting can be bad for performance, too, so you may need to 
 
 ## Usage
 
-First, create a `RelationMapper` instance, passing in a TypeORM `DataSource` object (which provides access to entity
-metadata):
+First, create a `GraphRelationBuilder` instance, passing in a TypeORM `DataSource` object (which provides access to
+entity metadata):
 
 ```ts
-import { RelationMapper } from 'typeorm-graphql-joiner';
+import { GraphRelationBuilder } from 'typeorm-graphql-joiner';
 import { dataSource } from './datasource';
 
-const relationMapper = new RelationMapper(dataSource);
+const graphRelationBuilder = new GraphRelationBuilder(dataSource);
 ```
 
-Inside a GraphQL query resolver (where you have a `GraphQLResolveInfo` object available) you can use `RelationMapper`
-to determine the relations you need to join to fulfill the query.
+Inside a GraphQL query resolver (where you have a `GraphQLResolveInfo` object available) you can use
+`GraphRelationBuilder` to determine the relations you need to join to fulfill the query.
 
-The `build` and `buildForQuery` methods of `RelationMapper` return a `RelationMap` instance. This is a class provided by
-the [typeorm-relations package](https://www.npmjs.com/package/typeorm-relations) and contains methods that you can use
-to manipulate the relations before passing them to TypeORM. Read the
+The `build` and `buildForQuery` methods of `GraphRelationBuilder` return a `RelationMap` instance. This is a class
+provided by the [typeorm-relations package](https://www.npmjs.com/package/typeorm-relations) and contains methods that
+you can use to manipulate the relations before passing them to TypeORM. Read the
 [typeorm-relations documentation](https://github.com/equalogic/typeorm-relations#readme) to learn more about it.
 
-### RelationMapper
+### GraphRelationBuilder
 
 #### `buildForQuery(entity: Constructor<Entity>, info: GraphQLResolveInfo): RelationMap<Entity>`
 
@@ -136,9 +136,9 @@ import { dataSource } from './datasource';
 
 // Example resolver function for a "products" query in your GQL schema
 function products(source: any, args: any, context: any, info: GraphQLResolveInfo): Promise<Product[]> {
-  const relationMapper = new RelationMapper(dataSource);
+  const graphRelationBuilder = new GraphRelationBuilder(dataSource);
 
-  const productRelationMap = relationMapper.buildForQuery(Product, info);
+  const productRelationMap = graphRelationBuilder.buildForQuery(Product, info);
 
   return dataSource.getRepository(Product).find({
     relations: productRelationMap.toFindOptionsRelations(),
@@ -184,7 +184,7 @@ async function createProduct(
   context: any,
   info: GraphQLResolveInfo,
 ): Promise<CreateProductPayload> {
-  const relationMapper = new RelationMapper(dataSource);
+  const graphRelationBuilder = new GraphRelationBuilder(dataSource);
 
   // Create the new product
   const product: Product = await dataSource.getRepository(Product).save(
@@ -198,7 +198,7 @@ async function createProduct(
     success: true,
     product: await dataSource.getRepository(Product).findOneOrFail({
       where: { id: product.id },
-      relations: relationMapper.buildForQuery(Product, info, 'product').toFindOptionsRelations(),
+      relations: graphRelationBuilder.buildForQuery(Product, info, 'product').toFindOptionsRelations(),
     }),
   };
 
@@ -230,7 +230,7 @@ The `Product` entity here exists below the root level of the object being resolv
 Dotted path notation can be used when the entity is at an even lower level in the node tree. For example, the path
 `'product.owner'` could be used to map the `Owner` entity in this example.
 
-#### `build(entity: Constructor<Entity>, baseNode: SelectionNode, fragments?: Record<string, FragmentDefinitionNode>): RelationMapper<Entity>`
+#### `build(entity: Constructor<Entity>, baseNode: SelectionNode, fragments?: Record<string, FragmentDefinitionNode>): GraphRelationBuilder<Entity>`
 
 This method works like `buildForQuery` (and is called by it internally), but it can operate on an arbitrary
 `SelectionNode` rather than requiring an entire `GraphQLResolveInfo` object.
