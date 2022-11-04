@@ -1,5 +1,6 @@
 import { IResolvers } from '@graphql-tools/utils';
 import { GraphQLResolveInfo } from 'graphql';
+import { isFieldSelected } from 'graphql-info-inspector';
 import { RelationMapper } from '../src';
 import { dataSource } from './data';
 import { Image, ImageSizeMap } from './entities/image';
@@ -116,15 +117,15 @@ export const resolvers: IResolvers<any, TestResolverContext> = {
       const videoRelationMap = relationMapper.buildForQuery(Video, info);
 
       // TODO: these kind of relations can't be mapped automatically yet
-      if (relationMapper.isFieldSelected('sizes.small', info)) {
+      if (isFieldSelected('sizes.small', info)) {
         imageRelationMap.add('sizeSmall');
       }
 
-      if (relationMapper.isFieldSelected('sizes.medium', info)) {
+      if (isFieldSelected('sizes.medium', info)) {
         imageRelationMap.add('sizeMedium');
       }
 
-      if (relationMapper.isFieldSelected('sizes.large', info)) {
+      if (isFieldSelected('sizes.large', info)) {
         imageRelationMap.add('sizeLarge');
       }
 
