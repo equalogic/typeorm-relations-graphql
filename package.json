@@ -2,7 +2,11 @@
   "name": "typeorm-graphql-joiner",
   "version": "1.0.2",
   "description": "A helper to join TypeORM relations based on fields selected in a GraphQL query.",
-  "keywords": ["typeorm", "graphql", "relations"],
+  "keywords": [
+    "typeorm",
+    "graphql",
+    "relations"
+  ],
   "author": "Equalogic Ltd",
   "license": "MIT",
   "publishConfig": {
