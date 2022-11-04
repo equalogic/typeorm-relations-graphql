@@ -17,6 +17,8 @@ fields selected by a client in a GraphQL query.
 
 Can be used as a potentially higher performance alternative to the [DataLoader pattern](https://github.com/graphql/dataloader).
 
+---
+
 ## Installation
 
 ```
@@ -34,6 +36,8 @@ Note: typeorm v0.3.0 [changed](https://typeorm.io/changelog#030httpsgithubcomtyp
 relations and data sources work. If you are still using typeorm v0.2.x, please install
 [typeorm-graphql-joiner@^1](https://github.com/equalogic/typeorm-graphql-joiner/blob/1.x/README.md) and read the usage
 instructions for that version.
+
+---
 
 ## Introduction
 
@@ -93,6 +97,8 @@ You could also use a [DataLoader](https://github.com/slaypni/type-graphql-datalo
 usually still result in more database queries than are produced by joining relations. Beware however that large joins
 with many levels of nesting can be bad for performance, too, so you may need to mix approaches.
 
+---
+
 ## Usage
 
 First, create a `RelationMapper` instance, passing in a TypeORM `DataSource` object (which provides access to entity
@@ -108,7 +114,10 @@ const relationMapper = new RelationMapper(dataSource);
 Inside a GraphQL query resolver (where you have a `GraphQLResolveInfo` object available) you can use `RelationMapper`
 to determine the relations you need to join to fulfill the query.
 
----
+The `build` and `buildForQuery` methods of `RelationMapper` return a `RelationMap` instance. This is a class provided by
+the [typeorm-relations package](https://www.npmjs.com/package/typeorm-relations) and contains methods that you can use
+to manipulate the relations before passing them to TypeORM. Read the
+[typeorm-relations documentation](https://github.com/equalogic/typeorm-relations#readme) to learn more about it.
 
 ### RelationMapper
 
@@ -242,56 +251,6 @@ Like `findQueryNode` but just returns a boolean indicating whether the reference
 represented by `info`.
 
 ---
-
-### RelationMap
-
-This is the object returned by the `build` and `buildForQuery` methods of `RelationMapper`. You can also call the
-constructor to create your own `RelationMap` instance and initialize it with a `FindOptionsRelations` object.
-
-`RelationMap` contains methods that you can use to manipulate the relations before passing them to TypeORM.
-
-#### `add(source: FindOptionsRelations | RelationMap | string)`
-
-If there are specific relations that you want to fetch regardless of whether they were selected by the client, you can
-use `add` to manually incorporate them into the map.
-
-```ts
-const relationMap = relationMapper.buildForQuery(Product, info);
-
-// Always fetch the Product.owner.address relation
-relationMap.add({ owner: { address: true } });
-
-// Top-level relations (only those that exist on Product directly) can be added by key name
-relationMap.add('owner');
-```
-
-You can also merge two `RelationMap` instances together:
-
-```ts
-const relationMap = new RelationMap<Product>({ owner: { address: true } });
-relationMap.add(relationMapper.buildForQuery(Product, info));
-```
-
-#### `toFindOptionsRelations()`
-
-Returns a plain object representation of the relations, suitable for use with any of TypeORM's repository methods that
-accept [`find` options](https://typeorm.io/find-options).
-
-Example:
-
-```ts
-const products = await dataSource.getRepository(Product).find({
-  relations: relationMap.toFindOptionsRelations(),
-  where: { ... },
-  order: { ... }
-})
-```
-
-If you are using a `SelectQueryBuilder`, you can join the relations like this:
-
-```ts
-queryBuilder.setFindOptions({ relations: relationMap.toFindOptionsRelations() });
-```
 
 ## License
 
