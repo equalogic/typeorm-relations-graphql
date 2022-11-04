@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="https://github.com/equalogic/typeorm-graphql-joiner/raw/master/resources/logo@720w.png" width="720" height="420">
+  <img src="https://github.com/equalogic/typeorm-relations-graphql/raw/master/resources/logo@720w.png" width="720" height="420">
   <br>
   <br>
-  <a href="https://npmjs.com/package/typeorm-graphql-joiner">
-    <img src="https://img.shields.io/npm/v/typeorm-graphql-joiner">
+  <a href="https://npmjs.com/package/typeorm-relations-graphql">
+    <img src="https://img.shields.io/npm/v/typeorm-relations-graphql">
   </a>
-  <a href="https://npmjs.com/package/typeorm-graphql-joiner">
-    <img src="https://img.shields.io/npm/dy/typeorm-graphql-joiner">
+  <a href="https://npmjs.com/package/typeorm-relations-graphql">
+    <img src="https://img.shields.io/npm/dy/typeorm-relations-graphql">
   </a>
   <br>
   <br>
@@ -22,7 +22,7 @@ Can be used as a potentially higher performance alternative to the [DataLoader p
 ## Installation
 
 ```
-npm i typeorm-graphql-joiner
+npm i typeorm-relations-graphql
 ```
 
 This library is written in TypeScript, so type definitions are included in the box.
@@ -34,7 +34,7 @@ Your project must also install the following as peer dependencies (you should ha
 
 Note: typeorm v0.3.0 [changed](https://typeorm.io/changelog#030httpsgithubcomtypeormtypeormpull8616-2022-03-17) the way
 relations and data sources work. If you are still using typeorm v0.2.x, please install
-[typeorm-graphql-joiner@^1](https://github.com/equalogic/typeorm-graphql-joiner/blob/1.x/README.md) and read the usage
+[typeorm-graphql-joiner@^1](https://github.com/equalogic/typeorm-relations-graphql/blob/1.x/README.md) and read the usage
 instructions for that version.
 
 ---
@@ -105,7 +105,7 @@ First, create a `GraphRelationBuilder` instance, passing in a TypeORM `DataSourc
 entity metadata):
 
 ```ts
-import { GraphRelationBuilder } from 'typeorm-graphql-joiner';
+import { GraphRelationBuilder } from 'typeorm-relations-graphql';
 import { dataSource } from './datasource';
 
 const graphRelationBuilder = new GraphRelationBuilder(dataSource);
