@@ -44,7 +44,7 @@
     "@graphql-tools/schema": "9.0.6",
     "@graphql-tools/utils": "8.13.1",
     "@types/jest": "29.2.4",
-    "@types/node": "18.11.10",
+    "@types/node": "18.11.11",
     "@typescript-eslint/eslint-plugin": "5.45.1",
     "@typescript-eslint/parser": "5.45.1",
     "barrelsby": "2.5.1",
