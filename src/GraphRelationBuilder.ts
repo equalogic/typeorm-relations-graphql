@@ -1,9 +1,9 @@
 import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode } from 'graphql';
 import { findSelectionNode, getNameFromNode, getSelectionSetFromNode } from 'graphql-info-inspector';
 import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
-import { RelationMap } from 'typeorm-relations';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
+import { RelationMap } from 'typeorm-relations';
 
 export class GraphRelationBuilder {
   public constructor(private readonly dataSource: DataSource) {}
