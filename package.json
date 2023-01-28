@@ -43,7 +43,7 @@
     "@graphql-tools/mock": "8.7.8",
     "@graphql-tools/schema": "9.0.6",
     "@graphql-tools/utils": "8.13.1",
-    "@types/jest": "29.2.6",
+    "@types/jest": "29.4.0",
     "@types/node": "18.11.18",
     "@typescript-eslint/eslint-plugin": "5.48.1",
     "@typescript-eslint/parser": "5.48.1",
