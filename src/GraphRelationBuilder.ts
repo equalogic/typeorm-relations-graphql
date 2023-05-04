@@ -2,8 +2,7 @@ import { FragmentDefinitionNode, GraphQLResolveInfo, SelectionNode } from 'graph
 import { findSelectionNode, getNameFromNode, getSelectionSetFromNode } from 'graphql-info-inspector';
 import { DataSource, EntityMetadata, EntitySchema, ObjectType } from 'typeorm';
 import { RelationMap } from 'typeorm-relations';
-import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
-import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
+import { isEmbeddedMetadata, isRelationMetadata } from './util/metadata';
 
 export class GraphRelationBuilder {
   public constructor(private readonly dataSource: DataSource) {}
@@ -73,12 +72,12 @@ export class GraphRelationBuilder {
           this.getEntityMetadata(currentTargetEntity).findEmbeddedWithPropertyPath(propPath);
 
         if (propMetadata != null) {
-          if (propMetadata instanceof RelationMetadata) {
+          if (isRelationMetadata(propMetadata)) {
             currentTargetEntity = propMetadata.inverseEntityMetadata.target;
             nextLevel = currentLevel + 1;
             currentPropertyPath.push(propMetadata.propertyName);
             relationMap.add(currentPropertyPath);
-          } else if (propMetadata instanceof EmbeddedMetadata) {
+          } else if (isEmbeddedMetadata(propMetadata)) {
             currentPropertyPath.push(propMetadata.propertyPath);
           }
         }
