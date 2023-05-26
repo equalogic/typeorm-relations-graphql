@@ -47,7 +47,7 @@
     "@types/node": "18.16.14",
     "@typescript-eslint/eslint-plugin": "5.48.1",
     "@typescript-eslint/parser": "5.48.1",
-    "barrelsby": "2.7.0",
+    "barrelsby": "2.8.0",
     "eslint": "8.31.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-import-resolver-typescript": "3.5.3",
