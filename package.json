@@ -1,6 +1,6 @@
 {
   "name": "typeorm-relations-graphql",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A helper to join TypeORM relations based on fields selected in a GraphQL query.",
   "keywords": [
     "typeorm",
