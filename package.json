@@ -36,8 +36,8 @@
     "typeorm": "^0.3.0"
   },
   "dependencies": {
-    "graphql-info-inspector": "1.0.0",
-    "typeorm-relations": "1.0.0"
+    "graphql-info-inspector": "^1.0.0",
+    "typeorm-relations": "^1.0.0"
   },
   "devDependencies": {
     "@graphql-tools/mock": "9.0.0",
