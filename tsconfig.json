@@ -15,8 +15,8 @@
     "strictNullChecks": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {}
+    "paths": {},
   },
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }
