@@ -41,8 +41,8 @@
   },
   "devDependencies": {
     "@graphql-tools/mock": "9.0.4",
-    "@graphql-tools/schema": "10.0.5",
-    "@graphql-tools/utils": "10.5.3",
+    "@graphql-tools/schema": "10.0.6",
+    "@graphql-tools/utils": "10.5.4",
     "@types/jest": "29.5.12",
     "@types/node": "18.19.44",
     "@typescript-eslint/eslint-plugin": "6.0.0",
