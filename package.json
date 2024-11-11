@@ -28,7 +28,7 @@
     "test:watch": "jest --watch",
     "test:ci": "rimraf test/.results && mkdirp test/.results && jest --ci --runInBand",
     "postversion": "npm run postbuild",
-    "release": "np",
+    "release": "np --no-publish --no-cleanup",
     "barrels:generate": "barrelsby --config barrelsby.json"
   },
   "peerDependencies": {
