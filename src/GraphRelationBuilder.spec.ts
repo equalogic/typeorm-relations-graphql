@@ -248,6 +248,39 @@ describe('GraphRelationBuilder', () => {
       ]);
     });
 
+    it('handles mapping a field path which is not present in GQL selection set', async () => {
+      // language=GraphQL
+      const query = `
+        query products {
+          products {
+            id
+            name
+          }
+        }
+      `;
+
+      const resolveInfoHook = (info: GraphQLResolveInfo): void => {
+        const relationMap = new GraphRelationBuilder(dataSource).buildForQuery(Store, info, 'store');
+
+        expect(relationMap.toFindOptionsRelations()).toEqual({});
+      };
+      const result = await graphql(executableSchema, query, {}, { resolveInfoHook });
+
+      // check we hit our assertions inside the resolveInfoHook callback
+      expect.assertions(1 + 4);
+
+      // check the query result looks right
+      expect(result).toBeDefined();
+      expect(result.errors).toBeUndefined();
+      expect(result.data).toBeDefined();
+      expect(result.data?.products).toEqual([
+        {
+          id: expect.any(Number),
+          name: mockData.productA.name,
+        },
+      ]);
+    });
+
     it('maps GQL selections containing spread fragments to ORM relations', async () => {
       // language=GraphQL
       const query = `
