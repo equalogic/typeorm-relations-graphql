@@ -25,7 +25,7 @@ export class GraphRelationBuilder {
     const baseNode = path != null ? findSelectionNode(path, info) : rootNode;
 
     if (baseNode == null) {
-      throw new Error(`Could not locate field named "${path}" in query info"`);
+      return new RelationMap<Entity>();
     }
 
     return this.build(entity, baseNode, info.fragments);
