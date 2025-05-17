@@ -61,7 +61,7 @@
     "prettier": "3.2.2",
     "sqlite3": "5.1.7",
     "ts-jest": "29.3.3",
-    "typeorm": "0.3.23",
+    "typeorm": "0.3.24",
     "typescript": "5.8.3"
   },
   "jest-junit": {
