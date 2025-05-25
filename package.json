@@ -40,7 +40,7 @@
     "typeorm-relations": "^1.0.0"
   },
   "devDependencies": {
-    "@graphql-tools/mock": "9.0.22",
+    "@graphql-tools/mock": "9.0.23",
     "@graphql-tools/schema": "10.0.23",
     "@graphql-tools/utils": "10.8.6",
     "@types/jest": "29.5.14",
