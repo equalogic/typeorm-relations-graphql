@@ -42,7 +42,7 @@
   "devDependencies": {
     "@graphql-tools/mock": "9.1.5",
     "@graphql-tools/schema": "10.0.31",
-    "@graphql-tools/utils": "10.11.0",
+    "@graphql-tools/utils": "11.0.0",
     "@types/jest": "29.5.14",
     "@types/node": "22.19.6",
     "@typescript-eslint/eslint-plugin": "6.0.0",
