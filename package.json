@@ -59,7 +59,7 @@
     "mkdirp": "3.0.1",
     "np": "10.3.0",
     "prettier": "3.2.2",
-    "sqlite3": "5.1.7",
+    "sqlite3": "6.0.1",
     "ts-jest": "29.4.15",
     "typeorm": "0.3.31",
     "typescript": "5.9.3"
